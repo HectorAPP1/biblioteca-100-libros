@@ -1,0 +1,34 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100">
+  <defs>
+    <linearGradient id="book-grad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#e8d080" />
+      <stop offset="100%" stop-color="#c9a84c" />
+    </linearGradient>
+  </defs>
+  <!-- Base circle background -->
+  <circle cx="50" cy="50" r="45" fill="#1a1610" />
+  
+  <!-- Back cover -->
+  <path d="M 30,22 L 75,32 L 75,82 L 30,72 Z" fill="#252018" />
+  
+  <!-- Pages / Inner block -->
+  <path d="M 26,26 L 68,36 L 68,80 L 26,70 Z" fill="#f0ead8" />
+  <path d="M 26,26 L 68,36 L 70,39 L 29,29 Z" fill="#e8e0ca" />
+  
+  <!-- Front cover -->
+  <path d="M 22,30 L 65,40 L 65,85 L 22,75 Z" fill="url(#book-grad)" />
+  
+  <!-- Spine -->
+  <path d="M 22,30 L 26,26 L 26,70 L 22,75 Z" fill="#8b7027" />
+  
+  <!-- Cover Details -->
+  <!-- Golden border frame -->
+  <path d="M 26,34 L 60,42 L 60,80 L 26,71 Z" fill="none" stroke="#685012" stroke-width="1.5" />
+  
+  <!-- Small diamond ornament -->
+  <polygon points="43,51 46,55 43,59 40,55" fill="#1a1610" />
+  
+  <!-- Book title lines -->
+  <line x1="32" y1="41" x2="55" y2="46" stroke="#1a1610" stroke-width="2" stroke-linecap="round" />
+  <line x1="32" y1="45" x2="48" y2="49" stroke="#1a1610" stroke-width="2" stroke-linecap="round" />
+</svg>
