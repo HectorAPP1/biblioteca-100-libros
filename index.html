@@ -1882,7 +1882,9 @@
           return;
         }
 
-        epubBook = window.ePub(buf); // buffer takes precedence
+        const blob = new Blob([buf], { type: 'application/epub+zip' });
+        window.currentEpubUrl = URL.createObjectURL(blob);
+        epubBook = window.ePub(window.currentEpubUrl);
         const viewport = document.getElementById('epub-viewport');
         viewport.innerHTML = '';
 
@@ -1927,6 +1929,7 @@
 
     window.closeReader = () => {
       if (epubRendition) { try { epubRendition.destroy(); } catch (e) { } epubRendition = null; epubBook = null; }
+      if (window.currentEpubUrl) { URL.revokeObjectURL(window.currentEpubUrl); window.currentEpubUrl = null; }
       showScreen('app');
     };
 
