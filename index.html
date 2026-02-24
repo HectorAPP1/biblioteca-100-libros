@@ -1432,6 +1432,10 @@
         const result = await signInWithPopup(auth, provider);
         const credential = GoogleAuthProvider.credentialFromResult(result);
         driveToken = credential?.accessToken || null;
+        if (driveToken) {
+          localStorage.setItem('driveToken', driveToken);
+          localStorage.setItem('driveTokenExpiry', Date.now() + 3500 * 1000);
+        }
         await initUserSession(result.user);
       } catch (e) {
         showToast('Error al iniciar sesión: ' + e.message, 'error');
@@ -1443,12 +1447,23 @@
       await fbSignOut(auth);
       currentUser = null; driveToken = null; driveFolderId = null;
       userBooksCache = {};
+      localStorage.removeItem('driveToken');
+      localStorage.removeItem('driveTokenExpiry');
       showScreen('login');
     };
 
     onAuthStateChanged(auth, async user => {
       if (user) {
         currentUser = user;
+        const cachedToken = localStorage.getItem('driveToken');
+        const cachedExpiry = localStorage.getItem('driveTokenExpiry');
+        if (cachedToken && cachedExpiry && Date.now() < parseInt(cachedExpiry)) {
+          driveToken = cachedToken;
+        } else {
+          driveToken = null;
+          localStorage.removeItem('driveToken');
+          localStorage.removeItem('driveTokenExpiry');
+        }
         await initUserSession(user);
       } else {
         document.getElementById('loading').style.display = 'none';
@@ -1588,6 +1603,8 @@
         const credential = GoogleAuthProvider.credentialFromResult(result);
         driveToken = credential?.accessToken || null;
         if (driveToken) {
+          localStorage.setItem('driveToken', driveToken);
+          localStorage.setItem('driveTokenExpiry', Date.now() + 3500 * 1000);
           await ensureDriveFolder();
           updateDriveStatus();
           showToast('✓ Google Drive conectado', 'success');
@@ -1846,7 +1863,7 @@
       currentBookId = id;
 
       if (!window.JSZip) {
-        await loadScript('https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js');
+        await loadScript('https://cdnjs.cloudflare.com/ajax/libs/jszip/3.1.5/jszip.min.js');
       }
       if (!window.ePub) {
         await loadScript('https://cdn.jsdelivr.net/npm/epubjs@0.3.88/dist/epub.min.js');
@@ -1854,28 +1871,57 @@
 
       try {
         if (epubRendition) { try { epubRendition.destroy(); } catch (e) { } }
-        epubBook = window.ePub(buf.slice(0));
+
+        if (buf.byteLength < 500) {
+          let msg = 'El archivo descargado es demasiado pequeño, puede que no sea un ePub válido o esté corrupto.';
+          try {
+            const textContent = new TextDecoder().decode(buf);
+            if (textContent.includes('error')) msg = `Error desde Google Drive: ${textContent}`;
+          } catch (e) { }
+          document.getElementById('epub-viewport').innerHTML = `<div style="color:var(--danger);text-align:center;padding:60px;">${msg}</div>`;
+          return;
+        }
+
+        epubBook = window.ePub(buf); // buffer takes precedence
         const viewport = document.getElementById('epub-viewport');
         viewport.innerHTML = '';
-        epubRendition = epubBook.renderTo(viewport, { width: '100%', height: '100%', spread: 'none' });
+
+        epubRendition = epubBook.renderTo("epub-viewport", { width: '100%', height: '100%', spread: 'none' });
 
         const cfi = bs.current_cfi;
-        if (cfi) epubRendition.display(cfi);
-        else epubRendition.display();
+        const displayPromise = cfi ? epubRendition.display(cfi) : epubRendition.display();
+
+        displayPromise.catch(err => {
+          console.error("Error original de epub.js:", err);
+          const errDiv = document.createElement('div');
+          errDiv.style.color = "var(--danger)";
+          errDiv.style.padding = "40px";
+          errDiv.innerHTML = `Error interno al intentar mostrar las páginas del libro. Puede que el ePub tenga un formato dañado u obscuro que <b>epub.js</b> no pueda leer.<br><br><small>${err?.message || err}</small>`;
+          viewport.appendChild(errDiv);
+        });
+
+        // Generate locations in the background for progress calculation
+        epubBook.ready.then(() => epubBook.locations.generate(1600)).catch(e => console.error("Location generation err:", e));
 
         document.getElementById('r-prev').onclick = () => epubRendition.prev();
         document.getElementById('r-next').onclick = () => epubRendition.next();
 
         epubRendition.on('relocated', async loc => {
-          const cfi = loc?.start?.cfi;
-          const page = loc?.start?.displayed?.page;
-          const total = loc?.start?.displayed?.total;
-          if (page && total) document.getElementById('reader-loc').textContent = `Pág ${page} / ${total}`;
-          if (cfi) await saveBookData(currentBookId, { current_cfi: cfi });
+          const locCfi = loc?.start?.cfi;
+          if (locCfi) {
+            const pageFromLocation = epubBook.locations.percentageFromCfi(locCfi);
+            if (typeof pageFromLocation === 'number' && !Number.isNaN(pageFromLocation)) {
+              const pct = Math.round(pageFromLocation * 100);
+              document.getElementById('reader-loc').textContent = `${pct}% del libro`;
+            } else {
+              document.getElementById('reader-loc').textContent = `Leído (${loc?.start?.displayed?.page || 1}/${loc?.start?.displayed?.total || '?'})`;
+            }
+            await saveBookData(currentBookId, { current_cfi: locCfi });
+          }
         });
       } catch (e) {
         document.getElementById('epub-viewport').innerHTML =
-          `<div style="color:#666;text-align:center;padding:60px;font-size:0.85rem;">Error al cargar el ePub: ${e.message}</div>`;
+          `<div style="color:var(--danger);text-align:center;padding:60px;font-size:0.85rem;">Excepción al inicializar el lector: ${e.message}</div>`;
       }
     };
 
