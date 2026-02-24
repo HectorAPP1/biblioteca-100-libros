@@ -1,0 +1,1282 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Biblioteca · 100 Libros Esenciales</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;0,900;1,400&family=DM+Sans:opsz,wght@9..40,300;9..40,400;9..40,500&display=swap" rel="stylesheet">
+<style>
+:root {
+  --ink: #0f0d09;
+  --ink2: #1a1610;
+  --ink3: #252018;
+  --paper: #f0ead8;
+  --paper2: #e8e0ca;
+  --gold: #c9a84c;
+  --gold2: #e8d080;
+  --gold-dim: rgba(201,168,76,0.15);
+  --rust: #8b3a1a;
+  --sage: #3d5c42;
+  --sage2: #5a8a62;
+  --muted: #6a6050;
+  --muted2: #9a8e7a;
+  --danger: #c0392b;
+  --r: 6px;
+}
+*{margin:0;padding:0;box-sizing:border-box;}
+html{scroll-behavior:smooth;}
+
+body {
+  font-family:'DM Sans',sans-serif;
+  background:var(--ink);
+  color:var(--paper);
+  min-height:100vh;
+  overflow-x:hidden;
+}
+
+/* NOISE TEXTURE */
+body::after {
+  content:'';position:fixed;inset:0;pointer-events:none;z-index:9999;
+  background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.04'/%3E%3C/svg%3E");
+  opacity:0.4;
+}
+
+/* ─── SCREENS ─── */
+.screen{display:none;min-height:100vh;}
+.screen.active{display:flex;}
+
+/* ─── LOGIN ─── */
+#screen-login {
+  align-items:center;justify-content:center;
+  background: radial-gradient(ellipse at 30% 40%, rgba(201,168,76,0.07) 0%, transparent 60%),
+              radial-gradient(ellipse at 75% 70%, rgba(139,58,26,0.06) 0%, transparent 50%),
+              var(--ink);
+}
+.login-card {
+  width:100%;max-width:420px;
+  padding:56px 48px;
+  background:var(--ink2);
+  border:1px solid rgba(201,168,76,0.15);
+  border-radius:12px;
+  box-shadow:0 40px 100px rgba(0,0,0,0.6);
+  text-align:center;
+  animation: fadeUp 0.6s ease both;
+}
+@keyframes fadeUp{from{opacity:0;transform:translateY(24px)}to{opacity:1;transform:translateY(0)}}
+
+.login-ornament {
+  font-size:2.5rem;margin-bottom:24px;
+  display:block;filter:drop-shadow(0 0 20px rgba(201,168,76,0.4));
+}
+.login-card h1 {
+  font-family:'Playfair Display',serif;
+  font-size:1.9rem;font-weight:900;
+  color:var(--gold);letter-spacing:-0.02em;
+  margin-bottom:8px;
+}
+.login-card p {
+  font-size:0.8rem;color:var(--muted2);
+  letter-spacing:0.1em;text-transform:uppercase;
+  margin-bottom:40px;
+}
+.btn-google {
+  width:100%;padding:14px 20px;
+  background:white;color:#1f1f1f;
+  border:none;border-radius:var(--r);
+  font-family:'DM Sans',sans-serif;
+  font-size:0.9rem;font-weight:500;
+  cursor:pointer;
+  display:flex;align-items:center;justify-content:center;gap:12px;
+  transition:all 0.2s;
+  box-shadow:0 4px 16px rgba(0,0,0,0.3);
+}
+.btn-google:hover{transform:translateY(-2px);box-shadow:0 8px 24px rgba(0,0,0,0.4);}
+.btn-google svg{width:20px;height:20px;flex-shrink:0;}
+.login-note{margin-top:20px;font-size:0.72rem;color:var(--muted);line-height:1.6;}
+
+/* ─── APP LAYOUT ─── */
+#screen-app{flex-direction:column;}
+
+/* TOPBAR */
+.topbar {
+  position:sticky;top:0;z-index:100;
+  padding:0 40px;height:60px;
+  background:rgba(15,13,9,0.92);
+  backdrop-filter:blur(12px);
+  border-bottom:1px solid rgba(201,168,76,0.1);
+  display:flex;align-items:center;gap:20px;
+}
+.topbar-logo {
+  font-family:'Playfair Display',serif;
+  font-size:1.1rem;font-weight:700;color:var(--gold);
+  white-space:nowrap;
+}
+.topbar-search {
+  flex:1;max-width:340px;
+  position:relative;
+}
+.topbar-search input {
+  width:100%;
+  background:rgba(255,255,255,0.04);
+  border:1px solid rgba(255,255,255,0.08);
+  color:var(--paper);
+  padding:8px 14px 8px 36px;
+  border-radius:4px;
+  font-family:'DM Sans',sans-serif;font-size:0.82rem;
+  outline:none;transition:border-color 0.2s;
+}
+.topbar-search input:focus{border-color:rgba(201,168,76,0.4);}
+.topbar-search input::placeholder{color:var(--muted);}
+.topbar-search-icon{position:absolute;left:10px;top:50%;transform:translateY(-50%);color:var(--muted);font-size:0.9rem;}
+.topbar-right{margin-left:auto;display:flex;align-items:center;gap:12px;}
+.drive-status {
+  font-size:0.7rem;padding:5px 12px;
+  border-radius:20px;cursor:pointer;
+  border:1px solid;transition:all 0.2s;
+}
+.drive-status.connected{
+  background:rgba(61,92,66,0.3);border-color:rgba(90,138,98,0.4);color:var(--sage2);
+}
+.drive-status.disconnected{
+  background:rgba(201,168,76,0.1);border-color:rgba(201,168,76,0.3);color:var(--gold);
+}
+.user-avatar {
+  width:32px;height:32px;border-radius:50%;
+  border:2px solid rgba(201,168,76,0.3);
+  cursor:pointer;overflow:hidden;
+  background:var(--ink3);
+  display:flex;align-items:center;justify-content:center;
+  font-size:0.8rem;color:var(--gold);font-weight:600;
+}
+.user-avatar img{width:100%;height:100%;object-fit:cover;}
+
+/* PROGRESS STRIP */
+.progress-strip {
+  padding:10px 40px;
+  background:rgba(201,168,76,0.04);
+  border-bottom:1px solid rgba(201,168,76,0.08);
+  display:flex;align-items:center;gap:16px;
+}
+.progress-bar-wrap{flex:1;height:3px;background:rgba(255,255,255,0.06);border-radius:2px;overflow:hidden;}
+.progress-bar-fill{height:100%;background:linear-gradient(90deg,var(--gold),var(--gold2));border-radius:2px;transition:width 0.6s ease;}
+.progress-stats{display:flex;gap:24px;}
+.pstat{text-align:center;}
+.pstat-n{font-family:'Playfair Display',serif;font-size:1.1rem;font-weight:700;color:var(--gold);display:block;line-height:1;}
+.pstat-l{font-size:0.6rem;letter-spacing:0.12em;text-transform:uppercase;color:var(--muted);display:block;margin-top:2px;}
+
+/* FILTERS */
+.filters-bar {
+  padding:14px 40px;
+  display:flex;gap:8px;flex-wrap:wrap;
+  border-bottom:1px solid rgba(255,255,255,0.04);
+}
+.ftab {
+  padding:6px 14px;border-radius:3px;
+  font-size:0.7rem;letter-spacing:0.08em;text-transform:uppercase;
+  cursor:pointer;border:1px solid rgba(255,255,255,0.08);
+  background:transparent;color:var(--muted2);
+  font-family:'DM Sans',sans-serif;transition:all 0.15s;
+}
+.ftab:hover{color:var(--paper);border-color:rgba(201,168,76,0.3);}
+.ftab.active{background:var(--gold);color:var(--ink);border-color:var(--gold);font-weight:500;}
+
+/* GRID */
+.grid-wrap{padding:32px 40px 60px;flex:1;}
+.cat-section{margin-bottom:44px;}
+.cat-title {
+  font-size:0.65rem;letter-spacing:0.22em;text-transform:uppercase;
+  color:var(--gold);margin-bottom:18px;
+  padding-bottom:10px;border-bottom:1px solid rgba(201,168,76,0.15);
+}
+.books-grid{
+  display:grid;
+  grid-template-columns:repeat(auto-fill,minmax(170px,1fr));
+  gap:18px;
+}
+
+/* BOOK CARD */
+.bcard {
+  background:var(--ink2);
+  border:1px solid rgba(255,255,255,0.05);
+  border-radius:var(--r);overflow:hidden;cursor:pointer;
+  transition:transform 0.22s ease, box-shadow 0.22s ease, border-color 0.22s;
+  animation:fadeUp 0.4s ease both;
+}
+.bcard:hover{
+  transform:translateY(-5px);
+  border-color:rgba(201,168,76,0.25);
+  box-shadow:0 20px 50px rgba(0,0,0,0.5);
+}
+.bcard.is-read{border-color:rgba(61,92,66,0.4);}
+.bcard.has-epub{border-color:rgba(201,168,76,0.3);}
+
+.bcard-spine{
+  height:190px;display:flex;align-items:center;justify-content:center;
+  position:relative;overflow:hidden;
+}
+.spine-bg{position:absolute;inset:0;}
+.spine-num{
+  position:absolute;top:8px;left:8px;
+  font-size:0.6rem;color:rgba(255,255,255,0.4);
+  background:rgba(0,0,0,0.4);padding:2px 6px;border-radius:2px;z-index:2;
+}
+.spine-badge{
+  position:absolute;top:8px;right:8px;
+  width:24px;height:24px;border-radius:50%;
+  display:flex;align-items:center;justify-content:center;
+  font-size:0.65rem;z-index:2;
+}
+.badge-read{background:var(--sage);}
+.badge-epub{background:rgba(201,168,76,0.9);color:var(--ink);}
+.badge-none{background:rgba(255,255,255,0.08);color:var(--muted2);}
+.spine-text{
+  writing-mode:vertical-rl;font-family:'Playfair Display',serif;
+  font-size:0.78rem;color:white;padding:12px 6px;
+  text-align:center;line-height:1.3;z-index:1;position:relative;
+  text-shadow:0 1px 4px rgba(0,0,0,0.6);
+}
+
+.bcard-info{padding:11px 13px 13px;}
+.bcard-title{font-family:'Playfair Display',serif;font-size:0.82rem;line-height:1.3;margin-bottom:3px;}
+.bcard-author{font-size:0.68rem;color:var(--muted2);margin-bottom:9px;}
+.bcard-actions{display:flex;gap:5px;}
+.bact{
+  flex:1;padding:5px 6px;border-radius:3px;
+  font-size:0.62rem;letter-spacing:0.05em;text-transform:uppercase;
+  cursor:pointer;border:none;font-family:'DM Sans',sans-serif;
+  transition:all 0.15s;text-align:center;
+}
+.bact-read{background:rgba(61,92,66,0.25);color:#7ab882;border:1px solid rgba(61,92,66,0.3);}
+.bact-read:hover{background:rgba(61,92,66,0.4);}
+.bact-read.on{background:var(--sage);color:white;}
+.bact-epub{background:rgba(201,168,76,0.12);color:var(--gold);border:1px solid rgba(201,168,76,0.2);}
+.bact-epub:hover{background:rgba(201,168,76,0.22);}
+.bact-epub.on{background:rgba(201,168,76,0.25);}
+.bact-open{background:rgba(201,168,76,0.75);color:var(--ink);border:1px solid var(--gold);font-weight:600;}
+.bact-open:hover{background:var(--gold);}
+
+/* ─── MODAL ─── */
+.modal-bg {
+  position:fixed;inset:0;z-index:200;
+  background:rgba(5,4,2,0.88);backdrop-filter:blur(10px);
+  display:none;align-items:center;justify-content:center;padding:20px;
+}
+.modal-bg.open{display:flex;}
+.modal {
+  background:var(--ink2);
+  border:1px solid rgba(201,168,76,0.18);
+  border-radius:10px;width:100%;max-width:800px;
+  max-height:90vh;overflow:hidden;
+  display:flex;flex-direction:column;
+  box-shadow:0 50px 120px rgba(0,0,0,0.8);
+  animation:fadeUp 0.25s ease both;
+}
+.modal-head {
+  padding:20px 24px;border-bottom:1px solid rgba(201,168,76,0.12);
+  display:flex;justify-content:space-between;align-items:flex-start;
+  flex-shrink:0;
+}
+.modal-head-title{font-family:'Playfair Display',serif;font-size:1rem;color:var(--gold);}
+.modal-head-sub{font-size:0.72rem;color:var(--muted2);margin-top:3px;}
+.modal-close{
+  background:none;border:none;color:var(--muted2);
+  font-size:1.3rem;cursor:pointer;padding:2px 8px;
+  border-radius:3px;transition:color 0.15s;line-height:1;
+}
+.modal-close:hover{color:var(--paper);}
+.modal-body{overflow-y:auto;padding:24px;flex:1;}
+
+.book-detail-grid{display:grid;grid-template-columns:180px 1fr;gap:24px;}
+.book-cover-big{
+  width:180px;height:256px;border-radius:4px;overflow:hidden;
+  position:relative;flex-shrink:0;
+}
+.detail-title{font-family:'Playfair Display',serif;font-size:1.4rem;line-height:1.2;margin-bottom:6px;}
+.detail-author{font-size:0.82rem;color:var(--gold);margin-bottom:14px;}
+.detail-why{
+  font-size:0.82rem;line-height:1.75;color:rgba(240,234,216,0.72);
+  padding:12px 14px;border-left:2px solid rgba(201,168,76,0.35);
+  background:rgba(201,168,76,0.04);border-radius:0 4px 4px 0;margin-bottom:16px;
+  font-style:italic;
+}
+.detail-tags{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:20px;}
+.dtag{
+  padding:3px 10px;border-radius:2px;font-size:0.62rem;
+  letter-spacing:0.1em;text-transform:uppercase;
+  background:rgba(201,168,76,0.08);color:var(--gold);
+  border:1px solid rgba(201,168,76,0.18);
+}
+
+/* RATING */
+.rating-row{display:flex;align-items:center;gap:8px;margin-bottom:16px;}
+.stars{display:flex;gap:3px;}
+.star{font-size:1.1rem;cursor:pointer;color:rgba(255,255,255,0.15);transition:color 0.1s;}
+.star.on{color:var(--gold);}
+.rating-label{font-size:0.72rem;color:var(--muted2);}
+
+/* NOTES */
+.notes-area{
+  width:100%;min-height:80px;
+  background:rgba(255,255,255,0.03);
+  border:1px solid rgba(255,255,255,0.08);
+  color:var(--paper);border-radius:4px;
+  padding:10px 12px;font-family:'DM Sans',sans-serif;
+  font-size:0.8rem;line-height:1.6;resize:vertical;outline:none;
+  transition:border-color 0.2s;
+}
+.notes-area:focus{border-color:rgba(201,168,76,0.35);}
+.notes-area::placeholder{color:var(--muted);}
+.save-note-btn{
+  margin-top:8px;padding:7px 16px;
+  background:rgba(201,168,76,0.15);border:1px solid rgba(201,168,76,0.3);
+  color:var(--gold);border-radius:3px;font-size:0.72rem;cursor:pointer;
+  font-family:'DM Sans',sans-serif;transition:all 0.15s;
+}
+.save-note-btn:hover{background:rgba(201,168,76,0.25);}
+
+/* UPLOAD ZONE */
+.upload-zone{
+  border:2px dashed rgba(201,168,76,0.2);border-radius:6px;
+  padding:28px 20px;text-align:center;cursor:pointer;
+  transition:all 0.2s;margin-top:16px;
+}
+.upload-zone:hover,.upload-zone.drag{
+  border-color:var(--gold);background:rgba(201,168,76,0.05);
+}
+.upload-zone-icon{font-size:2rem;margin-bottom:8px;}
+.upload-zone-text{font-size:0.78rem;color:var(--muted2);}
+.upload-zone-text strong{color:var(--gold);}
+.epub-ready{
+  margin-top:16px;padding:12px 16px;
+  background:rgba(61,92,66,0.15);border:1px solid rgba(61,92,66,0.3);
+  border-radius:4px;font-size:0.78rem;color:var(--sage2);
+  display:flex;align-items:center;justify-content:space-between;gap:12px;
+}
+.btn-read-epub{
+  padding:6px 14px;background:var(--gold);color:var(--ink);
+  border:none;border-radius:3px;font-size:0.72rem;font-weight:600;
+  cursor:pointer;font-family:'DM Sans',sans-serif;transition:all 0.15s;white-space:nowrap;
+}
+.btn-read-epub:hover{background:var(--gold2);}
+
+/* PROGRESS SLIDER */
+.progress-row{margin-top:16px;}
+.progress-row label{font-size:0.72rem;color:var(--muted2);display:block;margin-bottom:6px;}
+.progress-slider{width:100%;accent-color:var(--gold);cursor:pointer;}
+
+/* ─── READER ─── */
+#screen-reader{
+  flex-direction:column;background:var(--paper);color:var(--ink);
+}
+.reader-bar{
+  height:48px;padding:0 20px;
+  background:var(--ink2);border-bottom:1px solid rgba(201,168,76,0.15);
+  display:flex;align-items:center;gap:12px;flex-shrink:0;
+}
+.reader-title{font-family:'Playfair Display',serif;font-size:0.85rem;color:var(--gold);}
+.rbtn{
+  background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.1);
+  color:var(--paper);padding:5px 14px;border-radius:3px;
+  font-size:0.75rem;cursor:pointer;font-family:'DM Sans',sans-serif;
+  transition:all 0.15s;
+}
+.rbtn:hover{background:rgba(255,255,255,0.12);}
+.rbtn.gold{background:rgba(201,168,76,0.2);border-color:rgba(201,168,76,0.3);color:var(--gold);}
+.reader-loc{font-size:0.68rem;color:var(--muted);margin-left:auto;}
+#epub-viewport{flex:1;overflow:hidden;}
+
+/* DRIVE MODAL */
+.drive-modal{max-width:480px;}
+.drive-section{margin-bottom:20px;}
+.drive-section h3{font-size:0.75rem;letter-spacing:0.1em;text-transform:uppercase;color:var(--gold);margin-bottom:10px;}
+.drive-input{
+  width:100%;background:rgba(255,255,255,0.04);
+  border:1px solid rgba(255,255,255,0.1);
+  color:var(--paper);padding:9px 12px;border-radius:4px;
+  font-family:'DM Sans',sans-serif;font-size:0.82rem;outline:none;
+  transition:border-color 0.2s;
+}
+.drive-input:focus{border-color:rgba(201,168,76,0.4);}
+.drive-btn{
+  margin-top:8px;width:100%;padding:10px;
+  background:var(--gold);color:var(--ink);border:none;border-radius:4px;
+  font-family:'DM Sans',sans-serif;font-size:0.82rem;font-weight:600;
+  cursor:pointer;transition:all 0.15s;
+}
+.drive-btn:hover{background:var(--gold2);}
+.drive-info{font-size:0.75rem;color:var(--muted2);line-height:1.6;margin-top:8px;}
+
+/* USER MENU */
+.user-menu{
+  position:fixed;top:56px;right:16px;z-index:300;
+  background:var(--ink2);border:1px solid rgba(201,168,76,0.15);
+  border-radius:8px;padding:8px;min-width:200px;
+  box-shadow:0 20px 50px rgba(0,0,0,0.6);
+  display:none;animation:fadeUp 0.2s ease;
+}
+.user-menu.open{display:block;}
+.umenu-head{padding:8px 10px 12px;border-bottom:1px solid rgba(255,255,255,0.06);margin-bottom:6px;}
+.umenu-name{font-weight:500;font-size:0.85rem;}
+.umenu-email{font-size:0.72rem;color:var(--muted2);margin-top:2px;}
+.umenu-item{
+  width:100%;padding:8px 10px;border-radius:4px;
+  background:none;border:none;color:var(--paper);
+  font-family:'DM Sans',sans-serif;font-size:0.8rem;
+  cursor:pointer;text-align:left;transition:background 0.15s;display:block;
+}
+.umenu-item:hover{background:rgba(255,255,255,0.06);}
+.umenu-item.danger{color:#e57373;}
+
+/* TOAST */
+.toast{
+  position:fixed;bottom:24px;right:24px;z-index:9000;
+  background:var(--ink2);border:1px solid rgba(201,168,76,0.2);
+  color:var(--paper);padding:12px 18px;border-radius:6px;
+  font-size:0.8rem;box-shadow:0 8px 32px rgba(0,0,0,0.5);
+  animation:fadeUp 0.3s ease;max-width:320px;
+  display:none;
+}
+.toast.show{display:block;}
+.toast.success{border-color:rgba(61,92,66,0.5);color:var(--sage2);}
+.toast.error{border-color:rgba(192,57,43,0.4);color:#e57373;}
+
+/* LOADING */
+.loading-overlay{
+  position:fixed;inset:0;z-index:400;
+  background:var(--ink);display:flex;align-items:center;justify-content:center;
+  flex-direction:column;gap:16px;
+}
+.spinner{
+  width:36px;height:36px;border:3px solid rgba(201,168,76,0.15);
+  border-top-color:var(--gold);border-radius:50%;
+  animation:spin 0.8s linear infinite;
+}
+@keyframes spin{to{transform:rotate(360deg)}}
+.loading-overlay p{font-size:0.8rem;color:var(--muted2);}
+
+/* EMPTY */
+.empty{text-align:center;padding:60px 20px;color:var(--muted);}
+
+/* SCROLLBAR */
+::-webkit-scrollbar{width:4px;}
+::-webkit-scrollbar-track{background:transparent;}
+::-webkit-scrollbar-thumb{background:rgba(201,168,76,0.25);border-radius:2px;}
+
+/* RESPONSIVE */
+@media(max-width:700px){
+  .topbar,.filters-bar,.grid-wrap,.progress-strip{padding-left:16px;padding-right:16px;}
+  .books-grid{grid-template-columns:repeat(auto-fill,minmax(140px,1fr));}
+  .book-detail-grid{grid-template-columns:1fr;}
+  .book-cover-big{width:100%;height:180px;}
+}
+</style>
+</head>
+<body>
+
+<!-- LOADING -->
+<div class="loading-overlay" id="loading">
+  <div class="spinner"></div>
+  <p>Cargando biblioteca...</p>
+</div>
+
+<!-- ═══════════════ LOGIN ═══════════════ -->
+<div class="screen" id="screen-login">
+  <div class="login-card">
+    <span class="login-ornament">📚</span>
+    <h1>Biblioteca Esencial</h1>
+    <p>100 libros que transforman una vida</p>
+    <button class="btn-google" id="btn-google-login">
+      <svg viewBox="0 0 24 24"><path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/><path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/><path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"/><path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/></svg>
+      Continuar con Google
+    </button>
+    <p class="login-note">Al entrar autorizas acceso a tu Google Drive para guardar los ePubs. Tus datos son solo tuyos.</p>
+  </div>
+</div>
+
+<!-- ═══════════════ APP ═══════════════ -->
+<div class="screen" id="screen-app">
+
+  <div class="topbar">
+    <div class="topbar-logo">📚 Biblioteca</div>
+    <div class="topbar-search">
+      <span class="topbar-search-icon">⌕</span>
+      <input type="text" id="search-input" placeholder="Buscar título o autor...">
+    </div>
+    <div class="topbar-right">
+      <button class="drive-status disconnected" id="drive-btn" onclick="openDriveModal()">
+        ☁ Drive
+      </button>
+      <div class="user-avatar" id="user-avatar" onclick="toggleUserMenu()">?</div>
+    </div>
+  </div>
+
+  <div class="progress-strip">
+    <div class="progress-stats">
+      <div class="pstat"><span class="pstat-n" id="ps-read">0</span><span class="pstat-l">Leídos</span></div>
+      <div class="pstat"><span class="pstat-n" id="ps-epub">0</span><span class="pstat-l">Con ePub</span></div>
+      <div class="pstat"><span class="pstat-n" id="ps-pct">0%</span><span class="pstat-l">Avance</span></div>
+    </div>
+    <div class="progress-bar-wrap">
+      <div class="progress-bar-fill" id="prog-bar" style="width:0%"></div>
+    </div>
+  </div>
+
+  <div class="filters-bar">
+    <button class="ftab active" data-f="all">Todos</button>
+    <button class="ftab" data-f="unread">Por leer</button>
+    <button class="ftab" data-f="read">Leídos</button>
+    <button class="ftab" data-f="epub">Con ePub</button>
+    <button class="ftab" data-f="sabiduría">Sabiduría</button>
+    <button class="ftab" data-f="finanzas">Finanzas</button>
+    <button class="ftab" data-f="filosofía">Filosofía</button>
+    <button class="ftab" data-f="narrativa">Narrativa</button>
+  </div>
+
+  <div class="grid-wrap" id="grid-wrap"></div>
+</div>
+
+<!-- ═══════════════ READER ═══════════════ -->
+<div class="screen" id="screen-reader">
+  <div class="reader-bar">
+    <button class="rbtn" onclick="closeReader()">← Volver</button>
+    <span class="reader-title" id="reader-title"></span>
+    <button class="rbtn" id="r-prev">‹ Anterior</button>
+    <button class="rbtn" id="r-next">Siguiente ›</button>
+    <button class="rbtn gold" id="r-toc">Índice</button>
+    <span class="reader-loc" id="reader-loc"></span>
+  </div>
+  <div id="epub-viewport"></div>
+</div>
+
+<!-- ═══════════════ MODALS ═══════════════ -->
+
+<!-- Book modal -->
+<div class="modal-bg" id="book-modal">
+  <div class="modal">
+    <div class="modal-head">
+      <div>
+        <div class="modal-head-title" id="m-title"></div>
+        <div class="modal-head-sub" id="m-author"></div>
+      </div>
+      <button class="modal-close" onclick="closeBookModal()">✕</button>
+    </div>
+    <div class="modal-body" id="m-body"></div>
+  </div>
+</div>
+
+<!-- Drive modal -->
+<div class="modal-bg" id="drive-modal">
+  <div class="modal drive-modal">
+    <div class="modal-head">
+      <div>
+        <div class="modal-head-title">Conectar Google Drive</div>
+        <div class="modal-head-sub">Los ePubs se guardan en tu Drive personal</div>
+      </div>
+      <button class="modal-close" onclick="closeDriveModal()">✕</button>
+    </div>
+    <div class="modal-body">
+      <div class="drive-section">
+        <h3>Estado de conexión</h3>
+        <div id="drive-status-detail" class="drive-info">Verificando...</div>
+      </div>
+      <div class="drive-section" id="drive-connect-section">
+        <h3>Conectar Drive</h3>
+        <p class="drive-info">Al conectar, la app podrá guardar y leer tus archivos ePub desde una carpeta en tu Google Drive llamada <strong>Biblioteca Esencial</strong>.</p>
+        <button class="drive-btn" id="btn-connect-drive" onclick="connectDrive()">
+          ☁ Autorizar Google Drive
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- User menu -->
+<div class="user-menu" id="user-menu">
+  <div class="umenu-head">
+    <div class="umenu-name" id="umenu-name">Usuario</div>
+    <div class="umenu-email" id="umenu-email"></div>
+  </div>
+  <button class="umenu-item" onclick="openDriveModal();closeUserMenu()">☁ Google Drive</button>
+  <button class="umenu-item danger" onclick="signOut()">Cerrar sesión</button>
+</div>
+
+<!-- Toast -->
+<div class="toast" id="toast"></div>
+
+<!-- Hidden file input -->
+<input type="file" id="file-input" accept=".epub" style="display:none">
+
+<!-- ═══════════════ FIREBASE + APP ═══════════════ -->
+<script type="module">
+import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js';
+import { getAuth, GoogleAuthProvider, signInWithPopup, signOut as fbSignOut, onAuthStateChanged }
+  from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js';
+import { getFirestore, doc, getDoc, setDoc, updateDoc, collection, getDocs }
+  from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js';
+
+// ── CONFIG ──────────────────────────────────────────────────
+const FB_CONFIG = {
+  apiKey:            "AIzaSyALTtvWBafB9bK_42yxHmMN0cuosH485M4",
+  authDomain:        "libros100-a76f0.firebaseapp.com",
+  projectId:         "libros100-a76f0",
+  storageBucket:     "libros100-a76f0.firebasestorage.app",
+  messagingSenderId: "128482234061",
+  appId:             "1:128482234061:web:cf3e754de8da8eaf706384",
+};
+const GOOGLE_CLIENT_ID = "128482234061-c2vb7s3pm2pnbl534jsq8geb31k9an3s.apps.googleusercontent.com";
+const DRIVE_FOLDER_NAME = "Biblioteca Esencial";
+const DRIVE_SCOPE = "https://www.googleapis.com/auth/drive.file";
+
+// ── INIT ────────────────────────────────────────────────────
+const app  = initializeApp(FB_CONFIG);
+const auth = getAuth(app);
+const db   = getFirestore(app);
+const provider = new GoogleAuthProvider();
+provider.addScope(DRIVE_SCOPE);
+provider.setCustomParameters({ access_type: 'offline', prompt: 'consent' });
+
+// ── STATE ───────────────────────────────────────────────────
+let currentUser    = null;
+let driveToken     = null;
+let driveFolderId  = null;
+let userBooksCache = {};  // bookId → {is_read, drive_file_id, notes, rating, reading_progress, current_cfi}
+let currentFilter  = 'all';
+let searchQuery    = '';
+let currentBookId  = null;
+let epubBook       = null;
+let epubRendition  = null;
+
+// ── BOOKS DATA ──────────────────────────────────────────────
+const BOOKS = [
+  {id:1,n:1,title:"El hombre en busca de sentido",author:"Viktor Frankl",cat:"sabiduría",c:["#1e1040","#5a2d9a"],why:"El psiquiatra superviviente del Holocausto que descubrió: quien tiene un para qué soporta cualquier cómo.",tags:["Psicología","Imprescindible"]},
+  {id:2,n:2,title:"Meditaciones",author:"Marco Aurelio",cat:"sabiduría",c:["#0e2233","#1e6880"],why:"El diario privado de un emperador romano. El manual más honesto de autoexigencia y ecuanimidad.",tags:["Estoicismo","Clásico"]},
+  {id:3,n:3,title:"La psicología del dinero",author:"Morgan Housel",cat:"finanzas",c:["#0e2a14","#2a7a3a"],why:"Por qué tomamos tan malas decisiones financieras y cómo evitarlo. El mejor libro de finanzas de la última década.",tags:["Finanzas","Imprescindible"]},
+  {id:4,n:4,title:"Sapiens",author:"Yuval Noah Harari",cat:"sabiduría",c:["#1a1a30","#2a2a60"],why:"Una visión panorámica de toda la historia humana. Después de leerlo ves el dinero y las fronteras de otra manera.",tags:["Historia","Imprescindible"]},
+  {id:5,n:5,title:"La República",author:"Platón",cat:"filosofía",c:["#2a1040","#6a2a8a"],why:"El libro fundacional de la filosofía política. ¿Qué es la justicia? ¿Quién debe gobernar? Preguntas sin respuesta.",tags:["Filosofía","Clásico"]},
+  {id:6,n:6,title:"Crimen y castigo",author:"Fyodor Dostoievski",cat:"narrativa",c:["#2a0e0e","#7a2020"],why:"La exploración más profunda sobre la culpa y la redención. Dostoievski sabe más del alma humana que cualquier psicólogo.",tags:["Novela","Clásico"]},
+  {id:7,n:7,title:"El inversor inteligente",author:"Benjamin Graham",cat:"finanzas",c:["#0e1a2a","#1a3a6a"],why:"La biblia de la inversión sensata. Warren Buffett dice que es el mejor libro sobre inversión jamás escrito.",tags:["Finanzas","Inversión"]},
+  {id:8,n:8,title:"Así habló Zaratustra",author:"Friedrich Nietzsche",cat:"filosofía",c:["#2a1010","#8a2a2a"],why:"Un libro para cuestionar todos los valores que heredaste sin elegirlos. No para estar de acuerdo: para pensar.",tags:["Filosofía","Nietzsche"]},
+  {id:9,n:9,title:"Cien años de soledad",author:"Gabriel García Márquez",cat:"narrativa",c:["#2a1e08","#7a5a18"],why:"El libro latinoamericano más importante. La soledad como destino, la historia como ciclo, la magia como realidad.",tags:["Novela","Nobel","Imprescindible"]},
+  {id:10,n:10,title:"El cisne negro",author:"Nassim Taleb",cat:"finanzas",c:["#0e1a18","#1a5a50"],why:"Los eventos impredecibles mueven el mundo. Después de leerlo nunca confiarás ciegamente en pronósticos de expertos.",tags:["Finanzas","Filosofía"]},
+  {id:11,n:11,title:"Ética a Nicómaco",author:"Aristóteles",cat:"filosofía",c:["#1a2a10","#3a6a20"],why:"La primera reflexión completa sobre la virtud y la felicidad. La base de toda ética occidental.",tags:["Filosofía","Clásico"]},
+  {id:12,n:12,title:"1984",author:"George Orwell",cat:"narrativa",c:["#0e0e20","#2a2050"],why:"La distopía más influyente del siglo XX. La vigilancia y el lenguaje como control. Más vigente que nunca.",tags:["Novela","Distopía"]},
+  {id:13,n:13,title:"El hombre más rico de Babilonia",author:"George Clason",cat:"finanzas",c:["#2a1c08","#8a5c18"],why:"Principios financieros inamovibles escritos como fábulas. Se lee en un fin de semana y se aplica toda la vida.",tags:["Finanzas","Clásico"]},
+  {id:14,n:14,title:"Padre rico, padre pobre",author:"Robert Kiyosaki",cat:"finanzas",c:["#0e2a0e","#1a6a1a"],why:"La distinción activo/pasivo que cambia la mentalidad: no trabajar para el dinero sino hacer que el dinero trabaje.",tags:["Finanzas","Mentalidad"]},
+  {id:15,n:15,title:"Pedro Páramo",author:"Juan Rulfo",cat:"narrativa",c:["#1e0e0e","#5a1e1e"],why:"La novela mexicana más perfecta. Setenta páginas que contienen todo: muerte, poder, amor y culpa.",tags:["Novela","Clásico","México"]},
+  {id:16,n:16,title:"Freakonomics",author:"Levitt & Dubner",cat:"finanzas",c:["#1a0a2a","#4a1a7a"],why:"Los incentivos explican casi todo el comportamiento humano. El mejor punto de entrada a la economía.",tags:["Economía","Imprescindible"]},
+  {id:17,n:17,title:"Siddhartha",author:"Hermann Hesse",cat:"sabiduría",c:["#1e1808","#5a4818"],why:"La búsqueda del sentido a través de distintos caminos. Una novela filosófica de belleza incomparable.",tags:["Filosofía","Espiritualidad"]},
+  {id:18,n:18,title:"Los hermanos Karamázov",author:"Fyodor Dostoievski",cat:"narrativa",c:["#1e0e20","#5e2060"],why:"Dios, libre albedrío, amor paterno, fe y duda. Difícil pero te ensancha por dentro.",tags:["Novela","Filosofía","Clásico"]},
+  {id:19,n:19,title:"El segundo sexo",author:"Simone de Beauvoir",cat:"filosofía",c:["#2a0a1a","#7a1a4a"],why:"Cómo la sociedad construye identidades que la gente acepta sin cuestionarlas. Aplica a todos.",tags:["Filosofía","Sociología"]},
+  {id:20,n:20,title:"Pensar rápido, pensar despacio",author:"Daniel Kahneman",cat:"sabiduría",c:["#0e1e2a","#1a4a6a"],why:"Premio Nobel. Por qué tomamos decisiones irracionales constantemente, en el dinero y en todo lo demás.",tags:["Psicología","Economía"]},
+  {id:21,n:21,title:"Antifrágil",author:"Nassim Taleb",cat:"finanzas",c:["#0e2018","#1a5040"],why:"No solo cómo sobrevivir a la incertidumbre sino cómo prosperar gracias a ella.",tags:["Finanzas","Filosofía"]},
+  {id:22,n:22,title:"La riqueza de las naciones",author:"Adam Smith",cat:"finanzas",c:["#1a1808","#4a4818"],why:"El libro que inventó la economía moderna. Entender el mercado y la división del trabajo es obligatorio.",tags:["Economía","Clásico"]},
+  {id:23,n:23,title:"La condición humana",author:"Hannah Arendt",cat:"filosofía",c:["#0e180e","#1e481e"],why:"El análisis más profundo de la vida activa: trabajo, obra y acción humana en el mundo político.",tags:["Filosofía","Política"]},
+  {id:24,n:24,title:"Ficciones",author:"Jorge Luis Borges",cat:"narrativa",c:["#0e1228","#1a2a68"],why:"Los cuentos más inteligentes jamás escritos. Cada uno es un universo en diez páginas. Te deja pensando días.",tags:["Cuentos","Imprescindible"]},
+  {id:25,n:25,title:"El proceso",author:"Franz Kafka",cat:"narrativa",c:["#18081e","#481858"],why:"Acusado de un crimen que nunca se define. La burocracia y la culpa existencial como horror puro.",tags:["Novela","Existencialismo"]},
+  {id:26,n:26,title:"Fluir (Flow)",author:"Mihaly Csikszentmihalyi",cat:"sabiduría",c:["#0e201e","#1a5550"],why:"La psicología de la experiencia óptima. Cómo encontrar el estado de flow en el trabajo y la vida.",tags:["Psicología","Productividad"]},
+  {id:27,n:27,title:"El origen de las especies",author:"Charles Darwin",cat:"sabiduría",c:["#141e0a","#344e1a"],why:"El libro que cambió para siempre la comprensión del ser humano y su lugar en la naturaleza.",tags:["Ciencia","Clásico"]},
+  {id:28,n:28,title:"El extranjero",author:"Albert Camus",cat:"narrativa",c:["#1e1208","#5e3818"],why:"El absurdo como condición humana. Un hombre que no actúa según las expectativas sociales y paga por ello.",tags:["Novela","Existencialismo"]},
+  {id:29,n:29,title:"Un paso por delante de Wall Street",author:"Peter Lynch",cat:"finanzas",c:["#081e10","#185030"],why:"Cómo el inversor común puede superar a los profesionales usando lo que ya conoce de su vida diaria.",tags:["Finanzas","Inversión"]},
+  {id:30,n:30,title:"La insoportable levedad del ser",author:"Milan Kundera",cat:"narrativa",c:["#1a0818","#4e1848"],why:"Amor, política e identidad en la Praga comunista. Una novela filosófica de profundidad extraordinaria.",tags:["Novela","Filosofía"]},
+  {id:31,n:31,title:"Economía en una lección",author:"Henry Hazlitt",cat:"finanzas",c:["#0a180a","#1a481a"],why:"El libro más eficiente para entender microeconomía. Delgado, claro y directo. La lección es una pero infinita.",tags:["Economía","Micro"]},
+  {id:32,n:32,title:"El gen egoísta",author:"Richard Dawkins",cat:"sabiduría",c:["#0e1e08","#1e4e18"],why:"Cambia la mirada sobre la naturaleza humana desde la biología. Incómodo, fascinante, imprescindible.",tags:["Ciencia","Biología"]},
+  {id:33,n:33,title:"El capital en el siglo XXI",author:"Thomas Piketty",cat:"finanzas",c:["#1e0808","#5e1818"],why:"La tesis más importante sobre la desigualdad económica moderna. Imposible ignorar en cualquier debate serio.",tags:["Economía","Macro"]},
+  {id:34,n:34,title:"El maestro y Margarita",author:"Mijaíl Bulgákov",cat:"narrativa",c:["#10081e","#30185e"],why:"El diablo visita la Moscú estalinista. La novela rusa más brillante del siglo XX.",tags:["Novela","Sátira"]},
+  {id:35,n:35,title:"La interpretación de los sueños",author:"Sigmund Freud",cat:"sabiduría",c:["#1e0e18","#5e2e48"],why:"El libro que fundó el psicoanálisis y cambió para siempre la visión del inconsciente humano.",tags:["Psicología","Clásico"]},
+  {id:36,n:36,title:"Rayuela",author:"Julio Cortázar",cat:"narrativa",c:["#1a1408","#4a3418"],why:"La novela que inventó una nueva forma de leer. Un juego intelectual extraordinario.",tags:["Novela","Vanguardia"]},
+  {id:37,n:37,title:"Cosmos",author:"Carl Sagan",cat:"sabiduría",c:["#080e20","#181e60"],why:"El libro que más personas ha convertido en amantes de la ciencia. La historia del cosmos.",tags:["Ciencia","Astronomía"]},
+  {id:38,n:38,title:"El príncipe",author:"Maquiavelo",cat:"filosofía",c:["#1e1008","#5e3018"],why:"El manual más honesto sobre el poder. Sin ilusiones, sin moral decorativa. Indispensable.",tags:["Política","Clásico"]},
+  {id:39,n:39,title:"Si esto es un hombre",author:"Primo Levi",cat:"narrativa",c:["#0e0e18","#2e2e58"],why:"El testimonio más honesto y literariamente perfecto sobre el Holocausto. Imprescindible.",tags:["Memorias","Imprescindible"]},
+  {id:40,n:40,title:"Thinking in Systems",author:"Donella Meadows",cat:"finanzas",c:["#081a10","#184a30"],why:"Cómo pensar en sistemas complejos. Una herramienta mental extraordinaria para entender la economía y la sociedad.",tags:["Economía","Sistemas"]},
+  {id:41,n:41,title:"Don Quijote de la Mancha",author:"Miguel de Cervantes",cat:"narrativa",c:["#1e1808","#5e4818"],why:"La primera novela moderna. La tensión entre el ideal y la realidad, entre la locura y la sabiduría.",tags:["Novela","Clásico","Español"]},
+  {id:42,n:42,title:"Meditaciones cartesianas",author:"René Descartes",cat:"filosofía",c:["#0e0e20","#2e2e60"],why:"El punto de partida de la filosofía moderna: 'Pienso, luego existo'. La duda como método.",tags:["Filosofía","Clásico"]},
+  {id:43,n:43,title:"El triunfo del dinero",author:"Niall Ferguson",cat:"finanzas",c:["#1a1008","#4a3018"],why:"La historia del sistema financiero mundial: bancos, bolsas, bonos, seguros, imperios. Apasionante.",tags:["Economía","Historia"]},
+  {id:44,n:44,title:"Guerra y paz",author:"León Tolstói",cat:"narrativa",c:["#0e1e0e","#2e5e2e"],why:"La novela más ambiciosa jamás escrita. Reflexión sobre historia, libre albedrío y amor a través de cientos de personajes.",tags:["Novela","Clásico","Ruso"]},
+  {id:45,n:45,title:"El arte de amar",author:"Erich Fromm",cat:"sabiduría",c:["#1e0810","#5e1830"],why:"El amor no es un sentimiento, es un arte que requiere práctica. Cambia cómo te relacionas.",tags:["Psicología","Relaciones"]},
+  {id:46,n:46,title:"El malestar en la cultura",author:"Sigmund Freud",cat:"filosofía",c:["#180e18","#4e2e4e"],why:"El choque inevitable entre las pulsiones humanas y las exigencias de la civilización. Breve y devastador.",tags:["Psicología","Sociología"]},
+  {id:47,n:47,title:"Beloved",author:"Toni Morrison",cat:"narrativa",c:["#200808","#601818"],why:"La memoria de la esclavitud como herida que no cierra. Premio Nobel. Una de las novelas más poderosas del siglo XX.",tags:["Novela","Nobel"]},
+  {id:48,n:48,title:"La estructura de las revoluciones científicas",author:"Thomas Kuhn",cat:"sabiduría",c:["#0e1818","#1e4848"],why:"Cómo entendemos el progreso científico. El concepto de paradigma transformó múltiples disciplinas.",tags:["Ciencia","Filosofía"]},
+  {id:49,n:49,title:"Los detectives salvajes",author:"Roberto Bolaño",cat:"narrativa",c:["#0e1e10","#1e5030"],why:"La gran novela latinoamericana del fin del siglo XX. La búsqueda como metáfora de toda búsqueda.",tags:["Novela","Chile"]},
+  {id:50,n:50,title:"El camino de la servidumbre",author:"Friedrich Hayek",cat:"finanzas",c:["#1e1408","#5e3a18"],why:"La respuesta liberal al socialismo. Por qué la planificación central destruye la libertad.",tags:["Economía","Política"]},
+  {id:51,n:51,title:"La Ilíada",author:"Homero",cat:"narrativa",c:["#201008","#602a18"],why:"El primer texto literario de Occidente. La guerra, el honor y la mortalidad en su forma más pura.",tags:["Épica","Clásico","Grecia"]},
+  {id:52,n:52,title:"La Odisea",author:"Homero",cat:"narrativa",c:["#081420","#183460"],why:"El viaje de regreso a casa como metáfora de toda búsqueda humana.",tags:["Épica","Clásico","Grecia"]},
+  {id:53,n:53,title:"Dinero: domina el juego",author:"Tony Robbins",cat:"finanzas",c:["#081a08","#184a18"],why:"Los secretos de los mejores inversores del mundo sintetizados en un libro accesible y práctico.",tags:["Finanzas","Inversión"]},
+  {id:54,n:54,title:"El segundo cerebro",author:"Tiago Forte",cat:"sabiduría",c:["#101810","#304830"],why:"Cómo organizar tu conocimiento para construir una base de sabiduría acumulada a lo largo de la vida.",tags:["Productividad","Conocimiento"]},
+  {id:55,n:55,title:"Vigilar y castigar",author:"Michel Foucault",cat:"filosofía",c:["#100e20","#302e60"],why:"Cómo el poder controla los cuerpos y las mentes. Verás las instituciones de otra manera después.",tags:["Filosofía","Sociología"]},
+  {id:56,n:56,title:"Las mil y una noches",author:"Anónimo",cat:"narrativa",c:["#1e1008","#5e3018"],why:"La colección de cuentos más influyente de la humanidad. El marco narrativo que lo inventó todo.",tags:["Cuentos","Clásico","Oriental"]},
+  {id:57,n:57,title:"El alquimista",author:"Paulo Coelho",cat:"sabiduría",c:["#201408","#603418"],why:"Una fábula sobre la importancia de seguir los sueños propios. Sencillo pero universal.",tags:["Novela","Sabiduría"]},
+  {id:58,n:58,title:"Un mundo feliz",author:"Aldous Huxley",cat:"narrativa",c:["#081420","#183454"],why:"La distopía del placer: controlados por la felicidad fácil, no por el miedo. Profético.",tags:["Novela","Distopía","Ciencia Ficción"]},
+  {id:59,n:59,title:"Tao Te Ching",author:"Lao-Tsé",cat:"filosofía",c:["#081e10","#185030"],why:"Ochenta y un poemas que contienen una filosofía de vida entera. La sabiduría del no-actuar.",tags:["Filosofía","Oriental"]},
+  {id:60,n:60,title:"La sombra del viento",author:"Carlos Ruiz Zafón",cat:"narrativa",c:["#0e0e1a","#2e2e4a"],why:"Barcelona, un cementerio de libros y el misterio de un escritor olvidado. Una joya del thriller literario.",tags:["Novela","Contemporánea","Español"]},
+  {id:61,n:61,title:"El millonario de la puerta de al lado",author:"Thomas Stanley",cat:"finanzas",c:["#081808","#184818"],why:"Cómo viven realmente los millonarios. Derrumba todos los mitos sobre la riqueza.",tags:["Finanzas","Sociología"]},
+  {id:62,n:62,title:"Homo Deus",author:"Yuval Noah Harari",cat:"sabiduría",c:["#0a0a1e","#1a1a5e"],why:"El futuro de la humanidad: IA, biotecnología y el fin del humanismo tal como lo conocemos.",tags:["Futurismo","Historia"]},
+  {id:63,n:63,title:"Hamlet",author:"William Shakespeare",cat:"narrativa",c:["#100e1a","#302e4a"],why:"La obra más analizada de la historia. El ser o no ser como pregunta filosófica universal.",tags:["Teatro","Clásico","Inglés"]},
+  {id:64,n:64,title:"El nombre de la rosa",author:"Umberto Eco",cat:"narrativa",c:["#1a1008","#4a3018"],why:"Una novela de misterio medieval que es simultáneamente filosofía, semiótica e historia. Deslumbrante.",tags:["Novela","Historia"]},
+  {id:65,n:65,title:"Crashed",author:"Adam Tooze",cat:"finanzas",c:["#0e1018","#2e3058"],why:"El análisis más completo de la crisis de 2008. Para entender por qué el mundo económico es como es hoy.",tags:["Economía","Historia","Macro"]},
+  {id:66,n:66,title:"Guns, Germs and Steel",author:"Jared Diamond",cat:"sabiduría",c:["#141a08","#344a18"],why:"Por qué unas civilizaciones dominaron a otras. Una explicación geográfica del poder mundial.",tags:["Historia","Ciencia"]},
+  {id:67,n:67,title:"La divina comedia",author:"Dante Alighieri",cat:"narrativa",c:["#1a0818","#4a1848"],why:"El viaje por el infierno, el purgatorio y el paraíso como mapa del alma humana.",tags:["Épica","Clásico","Italiano"]},
+  {id:68,n:68,title:"Los 7 hábitos de la gente altamente efectiva",author:"Stephen Covey",cat:"sabiduría",c:["#0a1808","#1a4818"],why:"Los principios universales de efectividad personal. Uno de los libros de no-ficción más influyentes.",tags:["Autoayuda","Productividad"]},
+  {id:69,n:69,title:"Thinking in Bets",author:"Annie Duke",cat:"finanzas",c:["#0e0818","#2e1858"],why:"Cómo tomar mejores decisiones bajo incertidumbre usando el pensamiento probabilístico.",tags:["Finanzas","Decisiones"]},
+  {id:70,n:70,title:"El lobo estepario",author:"Hermann Hesse",cat:"narrativa",c:["#0e0e1e","#2e2e5e"],why:"La lucha del individuo moderno entre su naturaleza y su aspiración cultural. Sobre la soledad.",tags:["Novela","Psicología"]},
+  {id:71,n:71,title:"La ciudad y los perros",author:"Mario Vargas Llosa",cat:"narrativa",c:["#1a0808","#5a1818"],why:"La novela que inauguró el boom latinoamericano. Violencia y jerarquía en una academia militar.",tags:["Novela","Nobel","Latinoamérica"]},
+  {id:72,n:72,title:"Una breve historia del tiempo",author:"Stephen Hawking",cat:"sabiduría",c:["#08081e","#18185e"],why:"El libro de física más vendido de la historia. El universo y los agujeros negros, accesibles para todos.",tags:["Ciencia","Física"]},
+  {id:73,n:73,title:"El mundo y sus demonios",author:"Carl Sagan",cat:"sabiduría",c:["#180e08","#4e2e18"],why:"Una defensa apasionada del pensamiento crítico en un mundo lleno de pseudociencia y superstición.",tags:["Ciencia","Escepticismo"]},
+  {id:74,n:74,title:"El conde de Montecristo",author:"Alexandre Dumas",cat:"narrativa",c:["#1a1008","#4a3018"],why:"La novela de la venganza perfecta. Una de las historias más adictivas y moralmente complejas.",tags:["Novela","Clásico","Francés"]},
+  {id:75,n:75,title:"Madame Bovary",author:"Gustave Flaubert",cat:"narrativa",c:["#1e0e18","#5e2e48"],why:"La primera novela moderna en su perfección técnica. El deseo y el precio de las ilusiones románticas.",tags:["Novela","Clásico","Francés"]},
+  {id:76,n:76,title:"El poder de los introvertidos",author:"Susan Cain",cat:"sabiduría",c:["#0e1820","#1e4860"],why:"Cómo el mundo sobrevalúa la extroversión y por qué los introvertidos tienen ventajas únicas.",tags:["Psicología","Autoconocimiento"]},
+  {id:77,n:77,title:"Las uvas de la ira",author:"John Steinbeck",cat:"narrativa",c:["#201008","#602a18"],why:"La Gran Depresión y la dignidad de los pobres. Una novela política y humana de fuerza arrolladora.",tags:["Novela","Nobel","Americano"]},
+  {id:78,n:78,title:"Matar a un ruiseñor",author:"Harper Lee",cat:"narrativa",c:["#0e1e0e","#2e5e2e"],why:"La justicia, el racismo y la infancia. Atticus Finch es uno de los mejores personajes de la literatura.",tags:["Novela","Clásico","Americano"]},
+  {id:79,n:79,title:"El gran Gatsby",author:"F. Scott Fitzgerald",cat:"narrativa",c:["#0e1a1e","#1e4a5e"],why:"El sueño americano y su vacío. La ilusión de que el dinero puede comprar el amor y la felicidad.",tags:["Novela","Clásico","Americano"]},
+  {id:80,n:80,title:"I Will Teach You to Be Rich",author:"Ramit Sethi",cat:"finanzas",c:["#081e08","#185e18"],why:"El sistema financiero personal más completo para la generación joven. Automatiza tu riqueza.",tags:["Finanzas","Práctica"]},
+  {id:81,n:81,title:"Gilgamesh",author:"Anónimo (Sumerio)",cat:"narrativa",c:["#1e1408","#5e4018"],why:"El texto literario más antiguo conocido. La amistad, la muerte y la búsqueda de la inmortalidad.",tags:["Épica","Clásico","Antiguo"]},
+  {id:82,n:82,title:"Fausto",author:"Johann Wolfgang von Goethe",cat:"narrativa",c:["#180808","#501818"],why:"El hombre que vende su alma por el conocimiento. La ambición humana sin límites y sus consecuencias.",tags:["Épica","Clásico","Alemán"]},
+  {id:83,n:83,title:"Ensayos",author:"Michel de Montaigne",cat:"filosofía",c:["#141e08","#344e18"],why:"El inventor del ensayo moderno. La exploración de sí mismo como objeto de estudio. Una voz sabia y honesta.",tags:["Filosofía","Clásico"]},
+  {id:84,n:84,title:"La montaña mágica",author:"Thomas Mann",cat:"narrativa",c:["#0e1818","#1e4848"],why:"Siete años en un sanatorio donde se debaten las ideas del siglo XX. La novela de las ideas.",tags:["Novela","Nobel","Alemán"]},
+  {id:85,n:85,title:"Moby Dick",author:"Herman Melville",cat:"narrativa",c:["#08101e","#18305e"],why:"La obsesión humana llevada al extremo. Una novela sobre el mal y la autodestrucción.",tags:["Novela","Clásico","Americano"]},
+  {id:86,n:86,title:"El libro de Job",author:"Anónimo (Biblia)",cat:"filosofía",c:["#1e1a08","#5e4a18"],why:"El texto filosófico más profundo sobre el sufrimiento inmerecido. Job pregunta a Dios por qué sufre el inocente.",tags:["Filosofía","Clásico","Espiritualidad"]},
+  {id:87,n:87,title:"Los diálogos de Platón",author:"Platón",cat:"filosofía",c:["#10081e","#30185e"],why:"El Banquete, el Fedón, la Apología: Sócrates vive, ama y muere con consistencia filosófica ejemplar.",tags:["Filosofía","Clásico","Grecia"]},
+  {id:88,n:88,title:"El Bhagavad Gita",author:"Anónimo (Hinduismo)",cat:"filosofía",c:["#1e1008","#5e3010"],why:"El texto sagrado del hinduismo más universal. El deber, la acción y el desapego como filosofía de vida.",tags:["Filosofía","Oriental","Espiritualidad"]},
+  {id:89,n:89,title:"La vida secreta de los árboles",author:"Peter Wohlleben",cat:"sabiduría",c:["#081808","#184808"],why:"Cambia para siempre tu relación con la naturaleza. Los árboles se comunican y cuidan entre sí.",tags:["Ciencia","Naturaleza"]},
+  {id:90,n:90,title:"El mundo es plano",author:"Thomas Friedman",cat:"finanzas",c:["#080e18","#182e58"],why:"La globalización explicada con claridad. Cómo el comercio y la tecnología conectaron el planeta.",tags:["Economía","Globalización"]},
+  {id:91,n:91,title:"Anna Karénina",author:"León Tolstói",cat:"narrativa",c:["#1e081a","#5e184a"],why:"La novela más perfecta de Tolstói. El amor imposible, la sociedad hipócrita y el precio de la libertad.",tags:["Novela","Clásico","Ruso"]},
+  {id:92,n:92,title:"El poder del ahora",author:"Eckhart Tolle",cat:"sabiduría",c:["#0e1e08","#2e5e18"],why:"Transforma tu relación con el tiempo y la mente. Miles de personas reportan cambios profundos tras su lectura.",tags:["Mindfulness","Espiritualidad"]},
+  {id:93,n:93,title:"Manifiesto comunista",author:"Marx & Engels",cat:"finanzas",c:["#1e0808","#6e1818"],why:"El texto más influyente del siglo XX. Necesitas conocer la crítica marxista para entender el mundo moderno.",tags:["Economía","Política","Clásico"]},
+  {id:94,n:94,title:"Los pilares de la Tierra",author:"Ken Follett",cat:"narrativa",c:["#181008","#4a3018"],why:"La construcción de una catedral medieval como metáfora de la ambición, el poder y la fe.",tags:["Novela","Histórica"]},
+  {id:95,n:95,title:"El camino del artista",author:"Julia Cameron",cat:"sabiduría",c:["#1a0e18","#4a2e48"],why:"Un programa de 12 semanas para desbloquear la creatividad. Transformador para cualquier persona.",tags:["Creatividad","Autoconocimiento"]},
+  {id:96,n:96,title:"El lobo de mar",author:"Jack London",cat:"narrativa",c:["#081018","#183050"],why:"La voluntad de poder frente a la brutalidad de la naturaleza. London en su momento más filosófico.",tags:["Novela","Aventura"]},
+  {id:97,n:97,title:"El libro negro",author:"Orhan Pamuk",cat:"narrativa",c:["#100810","#302030"],why:"Estambul, identidad e historia entrelazadas en una novela de múltiples capas. Premio Nobel.",tags:["Novela","Nobel","Turquía"]},
+  {id:98,n:98,title:"Las confesiones",author:"San Agustín",cat:"filosofía",c:["#1a1008","#4a3018"],why:"El primer gran libro de introspección humana. Un hombre mirándose a sí mismo con honestidad brutal.",tags:["Filosofía","Clásico","Espiritualidad"]},
+  {id:99,n:99,title:"El guardián entre el centeno",author:"J.D. Salinger",cat:"narrativa",c:["#0e180e","#1e481e"],why:"La novela de la adolescencia y la autenticidad. Holden Caulfield contra la hipocresía del mundo adulto.",tags:["Novela","Contemporánea"]},
+  {id:100,n:100,title:"Epicteto – Enquiridión",author:"Epicteto",cat:"sabiduría",c:["#1e1a08","#5e5018"],why:"El manual estoico más compacto y práctico. Páginas que lees en una hora y aplicas toda la vida.",tags:["Estoicismo","Filosofía","Clásico"]},
+];
+
+const CAT_NAMES = {
+  sabiduría: '🧠 Sabiduría & Transformación Personal',
+  finanzas:  '💰 Finanzas & Economía',
+  filosofía: '⚖️ Filosofía',
+  narrativa: '📖 Narrativa Esencial',
+};
+
+// ── AUTH ────────────────────────────────────────────────────
+window.signInWithGoogle = async () => {
+  try {
+    const result = await signInWithPopup(auth, provider);
+    const credential = GoogleAuthProvider.credentialFromResult(result);
+    driveToken = credential?.accessToken || null;
+    await initUserSession(result.user);
+  } catch(e) {
+    showToast('Error al iniciar sesión: ' + e.message, 'error');
+  }
+};
+
+window.signOut = async () => {
+  closeUserMenu();
+  await fbSignOut(auth);
+  currentUser = null; driveToken = null; driveFolderId = null;
+  userBooksCache = {};
+  showScreen('login');
+};
+
+onAuthStateChanged(auth, async user => {
+  if (user) {
+    currentUser = user;
+    await initUserSession(user);
+  } else {
+    document.getElementById('loading').style.display = 'none';
+    showScreen('login');
+  }
+});
+
+async function initUserSession(user) {
+  currentUser = user;
+  // Load user books from Firestore
+  await loadUserBooks();
+  // Update UI
+  updateUserUI(user);
+  renderApp();
+  document.getElementById('loading').style.display = 'none';
+  showScreen('app');
+}
+
+function updateUserUI(user) {
+  const avatar = document.getElementById('user-avatar');
+  if (user.photoURL) {
+    avatar.innerHTML = `<img src="${user.photoURL}" alt="">`;
+  } else {
+    avatar.textContent = (user.displayName || user.email || '?')[0].toUpperCase();
+  }
+  document.getElementById('umenu-name').textContent = user.displayName || 'Usuario';
+  document.getElementById('umenu-email').textContent = user.email || '';
+}
+
+// ── FIRESTORE ───────────────────────────────────────────────
+async function loadUserBooks() {
+  if (!currentUser) return;
+  try {
+    const snap = await getDocs(collection(db, 'users', currentUser.uid, 'books'));
+    snap.forEach(d => { userBooksCache[d.id] = d.data(); });
+  } catch(e) { console.error('Error loading books:', e); }
+}
+
+async function saveBookData(bookId, data) {
+  if (!currentUser) return;
+  const ref = doc(db, 'users', currentUser.uid, 'books', String(bookId));
+  const existing = userBooksCache[bookId] || {};
+  const merged = { ...existing, ...data, updated_at: new Date().toISOString() };
+  await setDoc(ref, merged, { merge: true });
+  userBooksCache[bookId] = merged;
+}
+
+// ── GOOGLE DRIVE ─────────────────────────────────────────────
+async function ensureDriveFolder() {
+  if (driveFolderId) return driveFolderId;
+  if (!driveToken) return null;
+  try {
+    // Search for existing folder
+    const search = await fetch(
+      `https://www.googleapis.com/drive/v3/files?q=name='${DRIVE_FOLDER_NAME}' and mimeType='application/vnd.google-apps.folder' and trashed=false&fields=files(id,name)`,
+      { headers: { Authorization: `Bearer ${driveToken}` } }
+    );
+    const sData = await search.json();
+    if (sData.files && sData.files.length > 0) {
+      driveFolderId = sData.files[0].id;
+      return driveFolderId;
+    }
+    // Create folder
+    const create = await fetch('https://www.googleapis.com/drive/v3/files', {
+      method: 'POST',
+      headers: { Authorization: `Bearer ${driveToken}`, 'Content-Type': 'application/json' },
+      body: JSON.stringify({ name: DRIVE_FOLDER_NAME, mimeType: 'application/vnd.google-apps.folder' })
+    });
+    const cData = await create.json();
+    driveFolderId = cData.id;
+    return driveFolderId;
+  } catch(e) { console.error('Drive folder error:', e); return null; }
+}
+
+async function uploadEpubToDrive(file, bookId, bookTitle) {
+  if (!driveToken) { showToast('Conecta Google Drive primero', 'error'); return null; }
+  const folderId = await ensureDriveFolder();
+  showToast('Subiendo a Drive...');
+
+  const metadata = {
+    name: `${bookTitle}.epub`,
+    mimeType: 'application/epub+zip',
+    parents: folderId ? [folderId] : []
+  };
+  const form = new FormData();
+  form.append('metadata', new Blob([JSON.stringify(metadata)], { type: 'application/json' }));
+  form.append('file', file);
+
+  try {
+    const res = await fetch('https://www.googleapis.com/upload/drive/v3/files?uploadType=multipart&fields=id,name', {
+      method: 'POST',
+      headers: { Authorization: `Bearer ${driveToken}` },
+      body: form
+    });
+    const data = await res.json();
+    if (data.id) {
+      await saveBookData(bookId, { drive_file_id: data.id, drive_file_name: data.name });
+      showToast('✓ ePub guardado en Drive', 'success');
+      return data.id;
+    } else {
+      showToast('Error al subir a Drive', 'error');
+      return null;
+    }
+  } catch(e) {
+    showToast('Error de conexión con Drive', 'error');
+    return null;
+  }
+}
+
+async function getEpubFromDrive(fileId) {
+  if (!driveToken) { showToast('Conecta Google Drive primero', 'error'); return null; }
+  showToast('Descargando desde Drive...');
+  try {
+    const res = await fetch(`https://www.googleapis.com/drive/v3/files/${fileId}?alt=media`, {
+      headers: { Authorization: `Bearer ${driveToken}` }
+    });
+    if (!res.ok) throw new Error('No se pudo descargar');
+    const buf = await res.arrayBuffer();
+    showToast('✓ Libro cargado', 'success');
+    return buf;
+  } catch(e) {
+    showToast('Error al descargar desde Drive', 'error');
+    return null;
+  }
+}
+
+window.connectDrive = async () => {
+  try {
+    const result = await signInWithPopup(auth, provider);
+    const credential = GoogleAuthProvider.credentialFromResult(result);
+    driveToken = credential?.accessToken || null;
+    if (driveToken) {
+      await ensureDriveFolder();
+      updateDriveStatus();
+      showToast('✓ Google Drive conectado', 'success');
+      closeDriveModal();
+    }
+  } catch(e) {
+    showToast('Error al conectar Drive: ' + e.message, 'error');
+  }
+};
+
+function updateDriveStatus() {
+  const btn = document.getElementById('drive-btn');
+  if (driveToken) {
+    btn.className = 'drive-status connected';
+    btn.textContent = '✓ Drive';
+  } else {
+    btn.className = 'drive-status disconnected';
+    btn.textContent = '☁ Drive';
+  }
+}
+
+// ── RENDER ───────────────────────────────────────────────────
+function renderApp() {
+  updateStats();
+  renderGrid();
+  updateDriveStatus();
+}
+
+function updateStats() {
+  const readCount = BOOKS.filter(b => userBooksCache[b.id]?.is_read).length;
+  const epubCount = BOOKS.filter(b => userBooksCache[b.id]?.drive_file_id).length;
+  const pct = Math.round(readCount / BOOKS.length * 100);
+  document.getElementById('ps-read').textContent = readCount;
+  document.getElementById('ps-epub').textContent = epubCount;
+  document.getElementById('ps-pct').textContent = pct + '%';
+  document.getElementById('prog-bar').style.width = pct + '%';
+}
+
+function getFiltered() {
+  return BOOKS.filter(b => {
+    const bs = userBooksCache[b.id] || {};
+    if (currentFilter === 'read'   && !bs.is_read) return false;
+    if (currentFilter === 'unread' && bs.is_read)  return false;
+    if (currentFilter === 'epub'   && !bs.drive_file_id) return false;
+    if (['sabiduría','finanzas','filosofía','narrativa'].includes(currentFilter) && b.cat !== currentFilter) return false;
+    if (searchQuery) {
+      const q = searchQuery.toLowerCase();
+      return b.title.toLowerCase().includes(q) || b.author.toLowerCase().includes(q);
+    }
+    return true;
+  });
+}
+
+function renderGrid() {
+  const wrap = document.getElementById('grid-wrap');
+  const filtered = getFiltered();
+  if (!filtered.length) { wrap.innerHTML = '<div class="empty">No se encontraron libros</div>'; return; }
+
+  const cats = [...new Set(filtered.map(b => b.cat))];
+  wrap.innerHTML = cats.map(cat => {
+    const catBooks = filtered.filter(b => b.cat === cat);
+    return `
+      <div class="cat-section">
+        <div class="cat-title">${CAT_NAMES[cat] || cat}</div>
+        <div class="books-grid">
+          ${catBooks.map((b,i) => renderCard(b,i)).join('')}
+        </div>
+      </div>`;
+  }).join('');
+}
+
+function renderCard(b, idx) {
+  const bs = userBooksCache[b.id] || {};
+  const [c1,c2] = b.c;
+  const isRead = bs.is_read;
+  const hasEpub = !!bs.drive_file_id;
+
+  return `
+    <div class="bcard ${isRead?'is-read':''} ${hasEpub?'has-epub':''}"
+         style="animation-delay:${idx*0.03}s"
+         onclick="openBookModal(${b.id})">
+      <div class="bcard-spine" style="">
+        <div class="spine-bg" style="background:linear-gradient(145deg,${c1},${c2})"></div>
+        <span class="spine-num">#${b.n}</span>
+        <div class="spine-badge ${isRead?'badge-read':hasEpub?'badge-epub':'badge-none'}">
+          ${isRead?'✓':hasEpub?'📄':'·'}
+        </div>
+        <div class="spine-text">${b.title}</div>
+      </div>
+      <div class="bcard-info">
+        <div class="bcard-title">${b.title}</div>
+        <div class="bcard-author">${b.author}</div>
+        <div class="bcard-actions" onclick="event.stopPropagation()">
+          <button class="bact bact-read ${isRead?'on':''}" onclick="toggleRead(${b.id})">${isRead?'✓ Leído':'Leer'}</button>
+          <button class="bact bact-epub ${hasEpub?'on':''}" onclick="triggerEpubUpload(${b.id})">${hasEpub?'📄':'↑ ePub'}</button>
+          ${hasEpub?`<button class="bact bact-open" onclick="openReader(${b.id})">▶</button>`:''}
+        </div>
+      </div>
+    </div>`;
+}
+
+// ── BOOK MODAL ───────────────────────────────────────────────
+window.openBookModal = (id) => {
+  currentBookId = id;
+  const b = BOOKS.find(x => x.id === id);
+  if (!b) return;
+  const bs = userBooksCache[id] || {};
+  const [c1,c2] = b.c;
+  const hasEpub = !!bs.drive_file_id;
+
+  document.getElementById('m-title').textContent = b.title;
+  document.getElementById('m-author').textContent = b.author;
+
+  const starsHtml = [1,2,3,4,5].map(s =>
+    `<span class="star ${(bs.rating||0)>=s?'on':''}" onclick="setRating(${id},${s})">★</span>`
+  ).join('');
+
+  const progressVal = bs.reading_progress || 0;
+
+  document.getElementById('m-body').innerHTML = `
+    <div class="book-detail-grid">
+      <div>
+        <div class="book-cover-big">
+          <div style="position:absolute;inset:0;background:linear-gradient(145deg,${c1},${c2})"></div>
+          <div style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center;padding:20px;">
+            <div style="font-family:'Playfair Display',serif;font-size:0.9rem;color:white;text-align:center;line-height:1.4;text-shadow:0 1px 4px rgba(0,0,0,0.5);">${b.title}</div>
+          </div>
+        </div>
+        <div style="margin-top:14px;display:flex;flex-direction:column;gap:8px;">
+          <button class="bact bact-read ${bs.is_read?'on':''}" style="padding:10px;font-size:0.75rem;" onclick="toggleRead(${id})">
+            ${bs.is_read?'✓ Marcado como leído':'Marcar como leído'}
+          </button>
+          <button class="bact bact-epub" style="padding:10px;font-size:0.75rem;" onclick="triggerEpubUpload(${id})">
+            ${hasEpub?'📄 Reemplazar ePub':'↑ Subir ePub a Drive'}
+          </button>
+          ${hasEpub?`<button class="bact bact-open" style="padding:10px;font-size:0.75rem;" onclick="openReader(${id})">▶ Leer ahora</button>`:''}
+        </div>
+      </div>
+      <div>
+        <h2 class="detail-title">${b.title}</h2>
+        <div class="detail-author">${b.author}</div>
+        <div class="detail-why">${b.why}</div>
+        <div class="detail-tags">${(b.tags||[]).map(t=>`<span class="dtag">${t}</span>`).join('')}</div>
+
+        <div class="rating-row">
+          <span class="rating-label">Tu valoración:</span>
+          <div class="stars">${starsHtml}</div>
+        </div>
+
+        <div class="progress-row">
+          <label>Progreso de lectura: <strong id="prog-val">${progressVal}%</strong></label>
+          <input type="range" class="progress-slider" min="0" max="100" value="${progressVal}"
+            oninput="document.getElementById('prog-val').textContent=this.value+'%'"
+            onchange="saveProgress(${id},this.value)">
+        </div>
+
+        <div style="margin-top:16px;">
+          <label style="font-size:0.72rem;color:var(--muted2);display:block;margin-bottom:6px;">Notas personales</label>
+          <textarea class="notes-area" id="notes-area" placeholder="Escribe tus reflexiones, frases favoritas...">${bs.notes||''}</textarea>
+          <button class="save-note-btn" onclick="saveNotes(${id})">Guardar notas</button>
+        </div>
+
+        ${!hasEpub ? `
+        <div class="upload-zone" id="upload-zone-${id}"
+          ondragover="this.classList.add('drag');event.preventDefault()"
+          ondragleave="this.classList.remove('drag')"
+          ondrop="handleDrop(event,${id})"
+          onclick="triggerEpubUpload(${id})">
+          <div class="upload-zone-icon">📚</div>
+          <div class="upload-zone-text">Arrastra el <strong>ePub</strong> aquí o haz clic<br><span style="font-size:0.7rem;color:var(--muted)">Se guardará en tu Google Drive</span></div>
+        </div>` : `
+        <div class="epub-ready">
+          <span>📄 ${bs.drive_file_name || 'ePub en Drive'}</span>
+          <button class="btn-read-epub" onclick="openReader(${id})">▶ Leer</button>
+        </div>`}
+      </div>
+    </div>`;
+
+  document.getElementById('book-modal').classList.add('open');
+};
+
+window.closeBookModal = () => {
+  document.getElementById('book-modal').classList.remove('open');
+  currentBookId = null;
+};
+
+// ── ACTIONS ──────────────────────────────────────────────────
+window.toggleRead = async (id) => {
+  const bs = userBooksCache[id] || {};
+  const newVal = !bs.is_read;
+  await saveBookData(id, { is_read: newVal, read_at: newVal ? new Date().toISOString() : null });
+  renderApp();
+  // Update modal button if open
+  const btn = document.querySelector(`[onclick="toggleRead(${id})"]`);
+  if (btn) btn.textContent = newVal ? '✓ Marcado como leído' : 'Marcar como leído';
+  showToast(newVal ? '✓ Marcado como leído' : 'Desmarcado', 'success');
+};
+
+window.setRating = async (id, rating) => {
+  await saveBookData(id, { rating });
+  document.querySelectorAll('.star').forEach((s,i) => {
+    s.classList.toggle('on', i < rating);
+  });
+};
+
+window.saveProgress = async (id, value) => {
+  await saveBookData(id, { reading_progress: parseInt(value) });
+};
+
+window.saveNotes = async (id) => {
+  const notes = document.getElementById('notes-area')?.value || '';
+  await saveBookData(id, { notes });
+  showToast('✓ Notas guardadas', 'success');
+};
+
+window.triggerEpubUpload = (id) => {
+  currentBookId = id;
+  if (!driveToken) { openDriveModal(); return; }
+  document.getElementById('file-input').click();
+};
+
+document.getElementById('file-input').addEventListener('change', async function(e) {
+  const file = e.target.files[0];
+  if (!file || !file.name.endsWith('.epub')) return;
+  const b = BOOKS.find(x => x.id === currentBookId);
+  if (!b) return;
+  const fileId = await uploadEpubToDrive(file, currentBookId, b.title);
+  if (fileId) { renderApp(); if (currentBookId) openBookModal(currentBookId); }
+  this.value = '';
+});
+
+window.handleDrop = async (e, id) => {
+  e.preventDefault();
+  document.getElementById(`upload-zone-${id}`)?.classList.remove('drag');
+  const file = e.dataTransfer.files[0];
+  if (!file || !file.name.endsWith('.epub')) { showToast('Solo archivos .epub', 'error'); return; }
+  currentBookId = id;
+  if (!driveToken) { openDriveModal(); return; }
+  const b = BOOKS.find(x => x.id === id);
+  const fileId = await uploadEpubToDrive(file, id, b.title);
+  if (fileId) { renderApp(); openBookModal(id); }
+};
+
+// ── EPUB READER ──────────────────────────────────────────────
+window.openReader = async (id) => {
+  const bs = userBooksCache[id] || {};
+  if (!bs.drive_file_id) { showToast('No hay ePub para este libro', 'error'); return; }
+  closeBookModal();
+
+  const buf = await getEpubFromDrive(bs.drive_file_id);
+  if (!buf) return;
+
+  const b = BOOKS.find(x => x.id === id);
+  document.getElementById('reader-title').textContent = b?.title || '';
+  showScreen('reader');
+  currentBookId = id;
+
+  if (!window.ePub) {
+    await loadScript('https://cdnjs.cloudflare.com/ajax/libs/epub.js/0.3.88/epub.min.js');
+  }
+
+  try {
+    if (epubRendition) { try{epubRendition.destroy();}catch(e){} }
+    epubBook = window.ePub(buf.slice(0));
+    const viewport = document.getElementById('epub-viewport');
+    viewport.innerHTML = '';
+    epubRendition = epubBook.renderTo(viewport, { width:'100%', height:'100%', spread:'none' });
+
+    const cfi = bs.current_cfi;
+    if (cfi) epubRendition.display(cfi);
+    else epubRendition.display();
+
+    document.getElementById('r-prev').onclick = () => epubRendition.prev();
+    document.getElementById('r-next').onclick = () => epubRendition.next();
+
+    epubRendition.on('relocated', async loc => {
+      const cfi = loc?.start?.cfi;
+      const page = loc?.start?.displayed?.page;
+      const total = loc?.start?.displayed?.total;
+      if (page && total) document.getElementById('reader-loc').textContent = `Pág ${page} / ${total}`;
+      if (cfi) await saveBookData(currentBookId, { current_cfi: cfi });
+    });
+  } catch(e) {
+    document.getElementById('epub-viewport').innerHTML =
+      `<div style="color:#666;text-align:center;padding:60px;font-size:0.85rem;">Error al cargar el ePub: ${e.message}</div>`;
+  }
+};
+
+window.closeReader = () => {
+  if (epubRendition) { try{epubRendition.destroy();}catch(e){} epubRendition=null; epubBook=null; }
+  showScreen('app');
+};
+
+function loadScript(src) {
+  return new Promise((res,rej) => {
+    const s = document.createElement('script'); s.src=src;
+    s.onload=res; s.onerror=rej; document.head.appendChild(s);
+  });
+}
+
+// ── DRIVE MODAL ──────────────────────────────────────────────
+window.openDriveModal = () => {
+  const detail = document.getElementById('drive-status-detail');
+  const section = document.getElementById('drive-connect-section');
+  if (driveToken) {
+    detail.textContent = '✓ Conectado. Los ePubs se guardan en tu Google Drive, carpeta "Biblioteca Esencial".';
+    section.style.display = 'none';
+  } else {
+    detail.textContent = 'No conectado. Autoriza el acceso para poder guardar y leer tus ePubs desde Drive.';
+    section.style.display = 'block';
+  }
+  document.getElementById('drive-modal').classList.add('open');
+};
+window.closeDriveModal = () => document.getElementById('drive-modal').classList.remove('open');
+
+// ── USER MENU ─────────────────────────────────────────────────
+window.toggleUserMenu = () => document.getElementById('user-menu').classList.toggle('open');
+window.closeUserMenu  = () => document.getElementById('user-menu').classList.remove('open');
+document.addEventListener('click', e => {
+  if (!e.target.closest('#user-menu') && !e.target.closest('#user-avatar'))
+    closeUserMenu();
+});
+
+// ── FILTERS ───────────────────────────────────────────────────
+document.querySelectorAll('.ftab').forEach(t => {
+  t.addEventListener('click', () => {
+    document.querySelectorAll('.ftab').forEach(x => x.classList.remove('active'));
+    t.classList.add('active');
+    currentFilter = t.dataset.f;
+    renderGrid();
+  });
+});
+
+document.getElementById('search-input').addEventListener('input', e => {
+  searchQuery = e.target.value.trim();
+  renderGrid();
+});
+
+// ── SCREENS ───────────────────────────────────────────────────
+function showScreen(name) {
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+  document.getElementById(`screen-${name}`).classList.add('active');
+}
+
+// ── MODAL CLOSE ON BG ─────────────────────────────────────────
+document.getElementById('book-modal').addEventListener('click', e => {
+  if (e.target === document.getElementById('book-modal')) closeBookModal();
+});
+document.getElementById('drive-modal').addEventListener('click', e => {
+  if (e.target === document.getElementById('drive-modal')) closeDriveModal();
+});
+
+// ── TOAST ─────────────────────────────────────────────────────
+let toastTimer;
+window.showToast = (msg, type='') => {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.className = `toast show ${type}`;
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => t.classList.remove('show'), 3000);
+};
+
+// ── LOGIN BUTTON ──────────────────────────────────────────────
+document.getElementById('btn-google-login').addEventListener('click', window.signInWithGoogle);
+
+</script>
+</body>
+</html>
