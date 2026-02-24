@@ -815,16 +815,23 @@ async function loadUserBooks() {
   try {
     const snap = await getDocs(collection(db, 'users', currentUser.uid, 'books'));
     snap.forEach(d => { userBooksCache[d.id] = d.data(); });
-  } catch(e) { console.error('Error loading books:', e); }
+  } catch(e) {
+    console.warn('Firestore no disponible:', e.code);
+    showToast('⚠ Crea Firestore Database en Firebase Console para guardar progreso');
+  }
 }
 
 async function saveBookData(bookId, data) {
   if (!currentUser) return;
-  const ref = doc(db, 'users', currentUser.uid, 'books', String(bookId));
   const existing = userBooksCache[bookId] || {};
   const merged = { ...existing, ...data, updated_at: new Date().toISOString() };
-  await setDoc(ref, merged, { merge: true });
   userBooksCache[bookId] = merged;
+  try {
+    const ref = doc(db, 'users', currentUser.uid, 'books', String(bookId));
+    await setDoc(ref, merged, { merge: true });
+  } catch(e) {
+    console.warn('Firestore save failed:', e.code);
+  }
 }
 
 // ── GOOGLE DRIVE ─────────────────────────────────────────────
@@ -1170,7 +1177,7 @@ window.openReader = async (id) => {
   currentBookId = id;
 
   if (!window.ePub) {
-    await loadScript('https://cdnjs.cloudflare.com/ajax/libs/epub.js/0.3.88/epub.min.js');
+    await loadScript('https://cdn.jsdelivr.net/npm/epubjs@0.3.88/dist/epub.min.js');
   }
 
   try {
