@@ -1894,8 +1894,8 @@
       renderApp();
       // Update modal button if open
       const btn = document.querySelector(`[onclick="toggleRead(${id})"]`);
-      if (btn) btn.textContent = newVal ? '✓ Marcado como leído' : 'Marcar como leído';
-      showToast(newVal ? '✓ Marcado como leído' : 'Desmarcado', 'success');
+      if (btn) btn.textContent = newVal ? '✓ leído' : 'Marcar leído';
+      showToast(newVal ? '✓ leído' : 'Desmarcado', 'success');
     };
 
     window.setRating = async (id, rating) => {
