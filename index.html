@@ -362,13 +362,9 @@
       font-weight: 500;
     }
 
-    /* Recent reading strip */
+    /* Recent reading strip (same spacing as grid) */
     .recent-strip {
-      padding: 16px 40px 0;
-    }
-
-    .recent-strip .cat-section {
-      margin-bottom: 22px;
+      padding: 32px 40px 0;
     }
 
     /* GRID */
@@ -2105,24 +2101,15 @@
       const inProgress = BOOKS.map(b => {
         const bs = userBooksCache[b.id] || {};
         return { b, bs };
-      }).filter(x => (x.bs.reading_progress || 0) > 0 || x.bs.current_cfi).sort((a, b) => (b.bs.reading_progress || 0) - (a.bs.reading_progress || 0)).slice(0, 3);
+      }).filter(x => (x.bs.reading_progress || 0) > 0 || x.bs.current_cfi).sort((a, b) => (b.bs.reading_progress || 0) - (a.bs.reading_progress || 0)).slice(0, 6);
       if (!inProgress.length) { container.style.display = 'none'; container.innerHTML = ''; return; }
       container.style.display = 'block';
-      const cards = inProgress.map(({ b, bs }) => {
-        const cover = bs.cover_data_url;
-        const prog = bs.reading_progress || 0;
-        return `
-          <div class="recent-card">
-            <div class="recent-cover">${cover ? `<img src="${cover}" alt="${b.title}">` : ''}</div>
-            <div class="recent-meta">
-              <div class="recent-title-text">${b.title}</div>
-              <div class="recent-author">${b.author}</div>
-              <div class="recent-progress">${prog}% leído</div>
-              <button class="recent-btn" onclick="openReader(${b.id});event.stopPropagation();">Reanudar</button>
-            </div>
-          </div>`;
-      }).join('');
-      container.innerHTML = `<div class="recent-title">Sigues leyendo</div><div class="recent-row">${cards}</div>`;
+      const cards = inProgress.map(({ b }) => renderCard(b, 0)).join('');
+      container.innerHTML = `
+        <div class="cat-section">
+          <div class="cat-title">Sigues leyendo</div>
+          <div class="books-grid">${cards}</div>
+        </div>`;
     }
 
     function updateStats() {
