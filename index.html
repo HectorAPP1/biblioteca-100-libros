@@ -628,6 +628,22 @@
       color: var(--paper);
     }
 
+    /* Librin FAB always visible */
+    #librin-fab {
+      position: fixed;
+      bottom: 90px;
+      right: 18px;
+      z-index: 210;
+      display: block !important;
+    }
+
+    @media (max-width: 640px) {
+      #librin-fab {
+        bottom: calc(110px + env(safe-area-inset-bottom, 0px));
+        right: 14px;
+      }
+    }
+
     .modal-body {
       overflow-y: auto;
       padding: 24px;
