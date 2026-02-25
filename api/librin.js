@@ -1,6 +1,6 @@
 export default async function handler(req, res) {
   if (req.method !== "POST") return res.status(405).end();
-  const { text, question } = req.body || {};
+  const { text, question, context = {}, history = [] } = req.body || {};
   const apiKey = process.env.GROQ_API_KEY;
   if (!apiKey) return res.status(500).json({ error: "Missing GROQ_API_KEY" });
 
@@ -13,7 +13,22 @@ export default async function handler(req, res) {
     "llama-3.2-11b-text", // fallback v4 liviano
   ].filter(Boolean);
 
-  const prompt = `Fragmento:\n${text}\n\nPregunta del lector: ${question || "Explica en detalle"}\n\nExplica claro, breve y ademas entrega una mirada crítica al fragmento.`;
+  const historyText = history
+    .slice(-8)
+    .map((m) => `${m.role === "user" ? "Lector" : "Librin"}: ${m.content}`)
+    .join("\n");
+
+  const ctx = [
+    context.bookTitle ? `Libro: ${context.bookTitle}` : null,
+    context.pageLabel ? `Página: ${context.pageLabel}` : null,
+    context.visibleText ? `Texto visible: ${context.visibleText}` : null,
+  ]
+    .filter(Boolean)
+    .join("\n");
+
+  const prompt = `Contexto de lectura:\n${ctx || "(sin contexto)"}\n\nHistorial reciente:\n${historyText || "(sin historial)"}\n\nFragmento actual:\n${text}\n\nPregunta del lector: ${
+    question || "Explica en detalle"
+  }\n\nExplica claro, breve y ofrece mirada crítica/útil para el lector.`;
   let lastError = null;
   for (const model of modelCandidates) {
     const resp = await fetch(
