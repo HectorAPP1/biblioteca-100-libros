@@ -1586,9 +1586,25 @@
         const uploadData = await resUpload.json();
 
         if (uploadData.id) {
+          // Hacer el archivo público (lectura) para que los enlaces funcionen sin token
+          try {
+            await fetch(`https://www.googleapis.com/drive/v3/files/${uploadData.id}/permissions`, {
+              method: 'POST',
+              headers: {
+                'Authorization': `Bearer ${driveToken}`,
+                'Content-Type': 'application/json'
+              },
+              body: JSON.stringify({ role: 'reader', type: 'anyone' })
+            });
+          } catch (permErr) {
+            console.warn('No se pudo hacer público el archivo:', permErr);
+          }
+
+          // URL pública directa de descarga
+          const publicUrl = `https://drive.google.com/uc?export=download&id=${uploadData.id}`;
           await saveBookData(bookId, { drive_file_id: uploadData.id, drive_file_name: metadata.name });
           showToast('✓ ePub guardado en Drive', 'success');
-          return uploadData.id;
+          return { id: uploadData.id, publicUrl };
         } else {
           throw new Error('Fallo al subir contenido');
         }
@@ -1617,17 +1633,22 @@
           const retry = await fetch(fileId);
           if (retry.ok) {
             const blob = await retry.blob();
-            const fileUrl = URL.createObjectURL(blob);
+            if (blob.size < 1024) { showToast('El archivo local es inválido (muy pequeño)', 'error'); return null; }
             showToast('✓ Libro cargado', 'success');
-            return fileUrl;
+            return await blob.arrayBuffer();
           }
         }
 
         if (!res.ok) throw new Error('No se pudo descargar');
         const blob = await res.blob();
-        const fileUrl = URL.createObjectURL(blob);
+        const ctype = res.headers.get('Content-Type') || '';
+        if (!ctype.includes('epub') && blob.size < 1024) {
+          showToast('Respuesta no es un ePub válido (404 o HTML)', 'error');
+          return null;
+        }
+        const buffer = await blob.arrayBuffer();
         showToast('✓ Libro cargado', 'success');
-        return fileUrl;
+        return buffer;
       } catch (e) {
         showToast('Error al descargar desde Drive', 'error');
         return null;
@@ -1885,8 +1906,8 @@
     document.getElementById('file-input-local').addEventListener('change', async function (e) {
       const file = e.target.files[0];
       if (!file || !file.name.endsWith('.epub')) return;
-      const url = URL.createObjectURL(file);
-      await openReader(null, { url, title: file.name, isLocal: true });
+      const buffer = await file.arrayBuffer();
+      await openReader(null, { buffer, title: file.name, isLocal: true });
       this.value = '';
     });
 
@@ -1906,12 +1927,11 @@
     window.downloadEpub = async (id) => {
       const bs = userBooksCache[id] || {};
       if (!bs.drive_file_id) { showToast('No hay ePub para este libro', 'error'); return; }
-      if (!driveToken) { showToast('Conecta Google Drive para descargar', 'error'); openDriveModal(); return; }
+      const publicUrl = bs.drive_public_url || `https://drive.google.com/uc?export=download&id=${bs.drive_file_id}`;
       showToast('Descargando ePub...');
       try {
-        const res = await fetch(`https://www.googleapis.com/drive/v3/files/${bs.drive_file_id}?alt=media`, {
-          headers: { Authorization: `Bearer ${driveToken}` }
-        });
+        const headers = driveToken ? { Authorization: `Bearer ${driveToken}` } : {};
+        const res = await fetch(publicUrl, Object.keys(headers).length ? { headers } : {});
         if (!res.ok) throw new Error('No se pudo descargar');
         const blob = await res.blob();
         const url = URL.createObjectURL(blob);
@@ -1935,13 +1955,13 @@
 
       // Fallback local ePub (archivo incluido en el proyecto) si no hay drive_file_id
       const localEpub = 'Pensar_rapido_pensar_despacio_Daniel_Kahneman.epub';
-      const fileId = opts.url || bs.drive_file_id || localEpub;
-      if (!fileId) { showToast('No hay ePub para este libro', 'error'); return; }
+      const fileId = opts.buffer ? null : (opts.url || bs.drive_file_id || localEpub);
+      if (!fileId && !opts.buffer) { showToast('No hay ePub para este libro', 'error'); return; }
       closeBookModal();
 
-      let buf = opts.url || await getEpubFromDrive(fileId);
+      let buf = opts.buffer || await getEpubFromDrive(fileId);
       // Si falla Drive, probar el ePub local incluido
-      if (!buf && !opts.url && fileId !== localEpub) {
+      if (!buf && !opts.buffer && fileId !== localEpub) {
         buf = await getEpubFromDrive(localEpub);
       }
       if (!buf) return;
