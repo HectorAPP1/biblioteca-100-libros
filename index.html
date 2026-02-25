@@ -3,9 +3,24 @@
 
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
   <title>Biblioteca · 100 Libros Esenciales</title>
+
+  <!-- Favicon -->
   <link rel="icon" type="image/svg+xml" href="favicon.svg">
+
+  <!-- PWA / iPhone "Agregar a pantalla de inicio" -->
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="Biblioteca">
+  <link rel="apple-touch-icon" href="apple-touch-icon.svg">
+
+  <!-- Theme color (barra del navegador en Android y Safari) -->
+  <meta name="theme-color" content="#0f0d09">
+
+  <!-- Open Graph básico -->
+  <meta name="description" content="100 Libros Esenciales — Tu biblioteca personal">
+
   <link
     href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;0,900;1,400&family=DM+Sans:opsz,wght@9..40,300;9..40,400;9..40,500&display=swap"
     rel="stylesheet">
@@ -640,21 +655,18 @@
       border-radius: 50%;
       background: linear-gradient(145deg, #c9a84c, #e8d080);
       border: none;
-      cursor: grab;
+      cursor: pointer;
       box-shadow: 0 4px 20px rgba(201, 168, 76, 0.45), 0 2px 8px rgba(0, 0, 0, 0.4);
-      transition: transform 0.2s ease, box-shadow 0.2s ease;
       pointer-events: auto;
-      overflow: hidden;
       padding: 0;
-    }
-
-    #librin-fab:hover {
-      transform: scale(1.08);
-      box-shadow: 0 8px 28px rgba(201, 168, 76, 0.55), 0 4px 12px rgba(0, 0, 0, 0.4);
+      touch-action: manipulation;
+      user-select: none;
     }
 
     #librin-fab:active {
-      cursor: grabbing;
+      cursor: pointer;
+      transform: scale(0.93);
+      transition: transform 0.1s;
     }
 
     #librin-fab .fab-icon {
@@ -664,6 +676,10 @@
       width: 100%;
       height: 100%;
       font-size: 1.45rem;
+      pointer-events: none;
+      border-radius: 50%;
+      overflow: hidden;
+      background: inherit;
     }
 
     #librin-fab .fab-pulse {
@@ -822,6 +838,7 @@
       flex-shrink: 0;
       cursor: grab;
       user-select: none;
+      touch-action: none;
     }
 
     #librin-modal .modal-head:active {
@@ -1018,6 +1035,16 @@
     .lmsg strong {
       color: var(--gold2);
       font-weight: 600;
+    }
+
+    .lmsg-sep {
+      text-align: center;
+      font-size: 0.58rem;
+      letter-spacing: 0.1em;
+      color: var(--muted);
+      text-transform: uppercase;
+      padding: 4px 0 8px;
+      opacity: 0.6;
     }
 
     .lmsg.typing {
@@ -2189,6 +2216,11 @@
     provider.addScope(DRIVE_SCOPE);
     provider.setCustomParameters({ access_type: 'offline', prompt: 'consent' });
 
+    // Exponer helpers de Firestore para librin.js
+    window._fbDoc = doc;
+    window._fbGetDoc = getDoc;
+    window._fbSetDoc = setDoc;
+
     // ── STATE ───────────────────────────────────────────────────
     let currentUser = null;
     let driveToken = null;
@@ -3197,7 +3229,13 @@
         };
         applySwipeMode();
         applyTypography();
-        if (window.initLibrinHooks) { initLibrinHooks(epubRendition); }
+        if (window.initLibrinHooks) {
+          initLibrinHooks(epubRendition, {
+            bookId: currentBookId,
+            getUser: () => currentUser,
+            db,
+          });
+        }
 
         let startX = null; let startY = null;
         const resetSwipe = () => { startX = null; startY = null; };

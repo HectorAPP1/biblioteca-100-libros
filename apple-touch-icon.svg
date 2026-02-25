@@ -1,0 +1,52 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 180 180" width="180" height="180">
+  <defs>
+    <linearGradient id="bg-grad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#1a1610" />
+      <stop offset="100%" stop-color="#0f0d09" />
+    </linearGradient>
+    <linearGradient id="cover-grad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#e8d080" />
+      <stop offset="100%" stop-color="#c9a84c" />
+    </linearGradient>
+    <linearGradient id="glow-grad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#c9a84c" stop-opacity="0.15" />
+      <stop offset="100%" stop-color="#c9a84c" stop-opacity="0" />
+    </linearGradient>
+  </defs>
+
+  <!-- Background rounded rect (iOS will clip to rounded corners anyway) -->
+  <rect width="180" height="180" fill="url(#bg-grad)" rx="38" />
+
+  <!-- Subtle glow -->
+  <ellipse cx="90" cy="75" rx="80" ry="70" fill="url(#glow-grad)" />
+
+  <!-- Shadow of book -->
+  <ellipse cx="95" cy="148" rx="48" ry="7" fill="rgba(0,0,0,0.35)" />
+
+  <!-- Book back cover -->
+  <path d="M 56 42 L 135 58 L 135 148 L 56 132 Z" fill="#252018" rx="3"/>
+
+  <!-- Pages block -->
+  <path d="M 50 48 L 126 64 L 126 152 L 50 136 Z" fill="#f0ead8" />
+  <!-- Top edge of pages -->
+  <path d="M 50 48 L 126 64 L 130 68 L 54 52 Z" fill="#e0d8c0" />
+
+  <!-- Front cover -->
+  <path d="M 44 53 L 120 69 L 120 158 L 44 142 Z" fill="url(#cover-grad)" rx="2"/>
+
+  <!-- Spine -->
+  <path d="M 44 53 L 50 48 L 50 136 L 44 142 Z" fill="#8b7027" />
+
+  <!-- Cover border frame -->
+  <path d="M 50 58 L 113 72 L 113 152 L 50 137 Z" fill="none" stroke="rgba(26,22,16,0.5)" stroke-width="2.5" />
+
+  <!-- Diamond ornament -->
+  <polygon points="82,96 87,103 82,110 77,103" fill="rgba(26,22,16,0.5)" />
+
+  <!-- Book title lines -->
+  <line x1="58" y1="74" x2="100" y2="83" stroke="rgba(26,22,16,0.5)" stroke-width="3.5" stroke-linecap="round" />
+  <line x1="58" y1="83" x2="90" y2="91" stroke="rgba(26,22,16,0.5)" stroke-width="3.5" stroke-linecap="round" />
+
+  <!-- Star ornament top center -->
+  <text x="90" y="30" text-anchor="middle" font-size="14" fill="#c9a84c" opacity="0.8">✦</text>
+</svg>

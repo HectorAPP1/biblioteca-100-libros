@@ -2,70 +2,144 @@
   const fab = document.getElementById("librin-fab");
   const panel = document.getElementById("librin-modal");
   const textArea = document.getElementById("librin-text");
-  const questionInput = document.getElementById("librin-question");
+  const qInput = document.getElementById("librin-question");
   const chatBox = document.getElementById("librin-chat");
   const sendBtn = document.getElementById("librin-send");
 
-  if (!fab || !panel || !textArea || !questionInput || !chatBox || !sendBtn)
-    return;
+  if (!fab || !panel || !textArea || !qInput || !chatBox || !sendBtn) return;
 
   let selectionText = "";
   let currentContext = { bookTitle: "", pageLabel: "", visibleText: "" };
-  // Historial para que Librin aprenda del lector en la sesión
   let conversationHistory = [];
 
-  // ── POSICIÓN PERSISTENTE ──────────────────────────────────────────
-  let fabPos = null;
-  let panelPos = null;
+  // Firebase — inyectados desde initLibrinHooks
+  let _db = null,
+    _getUser = null,
+    _bookId = null,
+    _historyLoaded = false;
 
-  function applyFabPos() {
-    if (!fabPos) return;
-    fab.style.right = fabPos.right + "px";
-    fab.style.bottom = fabPos.bottom + "px";
+  // ── POSICIÓN ──────────────────────────────────────────────────────
+  function positionFab() {
+    // El FAB siempre se posiciona mediante CSS (right/bottom fijos).
+    // Esta función solo asegura que no haya left/top residuales.
+    fab.style.right = "";
+    fab.style.bottom = "";
     fab.style.left = "";
     fab.style.top = "";
   }
 
-  function syncPanelToFab() {
-    if (panelPos) {
-      panel.style.left = panelPos.left + "px";
-      panel.style.top = panelPos.top + "px";
-      panel.style.right = "";
-      panel.style.bottom = "";
-    } else {
-      const fw = fab.offsetWidth || 52;
-      const fh = fab.offsetHeight || 52;
-      const fr = fabPos ? fabPos.right : 24;
-      const fb = fabPos ? fabPos.bottom : 28;
-      const pw = panel.offsetWidth || 360;
-      const ph = panel.offsetHeight || 540;
-      const L = window.innerWidth - fr - fw / 2 - pw / 2;
-      const T = window.innerHeight - fb - fh - 12 - ph;
-      panel.style.left =
-        Math.max(8, Math.min(L, window.innerWidth - pw - 8)) + "px";
-      panel.style.top =
-        Math.max(8, Math.min(T, window.innerHeight - ph - 8)) + "px";
-      panel.style.right = "";
-      panel.style.bottom = "";
-    }
+  function positionPanel() {
+    // El FAB siempre está en right:24, bottom:28 (CSS fijo)
+    // El panel se posiciona justo encima del FAB, alineado a la derecha
+    const FAB_RIGHT = 24;
+    const FAB_BOTTOM = 28;
+    const FAB_H = fab.offsetHeight || 52;
+    const pw = panel.offsetWidth || 360;
+    const ph = panel.offsetHeight || 540;
+
+    const right = FAB_RIGHT;
+    const bottom = FAB_BOTTOM + FAB_H + 12;
+
+    panel.style.right = right + "px";
+    panel.style.bottom = bottom + "px";
+    panel.style.left = "";
+    panel.style.top = "";
+  }
+
+  // ── DRAG ENGINE (solo para el panel, no para el FAB) ─────────────
+  function makeDraggable(target, handle, onClickCb) {
+    let dragging = false;
+    let startPointerX, startPointerY, startElemX, startElemY;
+
+    handle.addEventListener("pointerdown", (e) => {
+      if (e.target !== handle && e.target.closest("button")) return;
+      if (e.button !== 0) return;
+
+      e.preventDefault();
+      dragging = false;
+
+      const rect = target.getBoundingClientRect();
+      startPointerX = e.clientX;
+      startPointerY = e.clientY;
+      startElemX = rect.left;
+      startElemY = rect.top;
+
+      target.style.left = rect.left + "px";
+      target.style.top = rect.top + "px";
+      target.style.right = "";
+      target.style.bottom = "";
+
+      function onMove(ev) {
+        const dx = ev.clientX - startPointerX;
+        const dy = ev.clientY - startPointerY;
+
+        if (!dragging && Math.hypot(dx, dy) > 5) {
+          dragging = true;
+          target.style.transition = "none";
+        }
+        if (!dragging) return;
+
+        const W = window.innerWidth,
+          H = window.innerHeight;
+        const tw = target.offsetWidth,
+          th = target.offsetHeight;
+
+        target.style.left =
+          Math.max(0, Math.min(startElemX + dx, W - tw)) + "px";
+        target.style.top =
+          Math.max(0, Math.min(startElemY + dy, H - th)) + "px";
+      }
+
+      function onUp() {
+        document.removeEventListener("pointermove", onMove);
+        document.removeEventListener("pointerup", onUp);
+        target.style.transition = "";
+
+        if (!dragging) {
+          onClickCb && onClickCb();
+        }
+        dragging = false;
+      }
+
+      document.addEventListener("pointermove", onMove);
+      document.addEventListener("pointerup", onUp);
+    });
+  }
+
+  // FAB: solo click, SIN drag — siempre fijo abajo a la derecha
+  fab.addEventListener("click", () => {
+    if (panel.classList.contains("open")) closePanel();
+    else openPanel();
+  });
+
+  // Aplicar drag solo al panel (desde el header)
+  const panelHead = panel.querySelector(".modal-head");
+  if (panelHead) {
+    makeDraggable(panel, panelHead, null);
   }
 
   // ── OPEN / CLOSE ──────────────────────────────────────────────────
-  function closeModal() {
+  function openPanel() {
+    textArea.value = selectionText;
+    qInput.value = "";
+    panel.style.display = "flex";
+
+    // Calcular posición si no fue movido manualmente
+    const hasManualPos = panel.style.left && panel.style.left !== "";
+    if (!hasManualPos) positionPanel();
+
+    panel.offsetHeight; // reflow
+    panel.classList.add("open");
+
+    if (!_historyLoaded) loadHistory();
+    setTimeout(() => qInput.focus(), 60);
+  }
+
+  function closePanel() {
     panel.classList.remove("open");
     setTimeout(() => {
       if (!panel.classList.contains("open")) panel.style.display = "";
     }, 220);
-  }
-
-  function openModal() {
-    textArea.value = selectionText;
-    questionInput.value = "";
-    panel.style.display = "flex";
-    syncPanelToFab();
-    panel.offsetHeight;
-    panel.classList.add("open");
-    setTimeout(() => questionInput.focus(), 50);
   }
 
   window.openLibrinModalFromSelection = () => {
@@ -76,166 +150,139 @@
     if (!selectionText && currentContext.visibleText) {
       selectionText = currentContext.visibleText.slice(0, 1000);
     }
-    openModal();
+    openPanel();
   };
 
-  window.closeLibrinModal = closeModal;
+  window.closeLibrinModal = closePanel;
 
-  // ── DRAG: FAB ─────────────────────────────────────────────────────
-  makeDraggable(fab, fab, {
-    onDragStart() {
-      fab.classList.add("dragging");
-    },
-    onDragEnd(left, top) {
-      fab.classList.remove("dragging");
-      fabPos = {
-        right: window.innerWidth - left - fab.offsetWidth,
-        bottom: window.innerHeight - top - fab.offsetHeight,
-      };
-      applyFabPos();
-    },
-    onClick() {
-      if (panel.classList.contains("open")) closeModal();
-      else window.openLibrinModalFromSelection();
-    },
-  });
-
-  // ── DRAG: PANEL ───────────────────────────────────────────────────
-  const panelHeader = panel.querySelector(".modal-head");
-  makeDraggable(panel, panelHeader, {
-    onDragStart() {
-      panel.classList.add("dragging");
-    },
-    onDragEnd(left, top) {
-      panel.classList.remove("dragging");
-      panelPos = { left, top };
-    },
-    onClick() {},
-  });
-
+  // Cerrar al hacer clic fuera
   document.addEventListener("click", (e) => {
     if (
       panel.classList.contains("open") &&
       !panel.contains(e.target) &&
       !fab.contains(e.target)
-    ) {
-      closeModal();
-    }
+    )
+      closePanel();
   });
 
-  // ── DRAG ENGINE ───────────────────────────────────────────────────
-  function makeDraggable(target, handle, { onDragStart, onDragEnd, onClick }) {
-    let startX,
-      startY,
-      startL,
-      startT,
-      dragged = false;
-
-    handle.addEventListener("pointerdown", (e) => {
-      if (e.target.closest("button") && e.target.closest("button") !== handle)
-        return;
-      if (e.button !== 0) return;
-
-      dragged = false;
-      const rect = target.getBoundingClientRect();
-      startX = e.clientX;
-      startY = e.clientY;
-      startL = rect.left;
-      startT = rect.top;
-
-      handle.setPointerCapture(e.pointerId);
-      e.preventDefault();
-
-      function onMove(ev) {
-        const dx = ev.clientX - startX;
-        const dy = ev.clientY - startY;
-        if (!dragged && Math.hypot(dx, dy) > 4) {
-          dragged = true;
-          onDragStart && onDragStart();
-        }
-        if (!dragged) return;
-        const W = window.innerWidth,
-          H = window.innerHeight;
-        const tw = target.offsetWidth,
-          th = target.offsetHeight;
-        const newL = Math.max(0, Math.min(startL + dx, W - tw));
-        const newT = Math.max(0, Math.min(startT + dy, H - th));
-        target.style.left = newL + "px";
-        target.style.top = newT + "px";
-        target.style.right = "";
-        target.style.bottom = "";
+  // ── FIRESTORE ─────────────────────────────────────────────────────
+  async function loadHistory() {
+    if (!_db || !_getUser || !_bookId) return;
+    const user = _getUser();
+    if (!user) return;
+    try {
+      const ref = window._fbDoc(
+        _db,
+        "users",
+        user.uid,
+        "books",
+        String(_bookId),
+        "librin",
+        "chat",
+      );
+      const snap = await window._fbGetDoc(ref);
+      if (snap.exists()) {
+        conversationHistory = snap.data().history || [];
+        renderHistoryInChat();
       }
-
-      function onUp(ev) {
-        handle.removeEventListener("pointermove", onMove);
-        handle.removeEventListener("pointerup", onUp);
-        if (dragged) {
-          const rect = target.getBoundingClientRect();
-          onDragEnd && onDragEnd(rect.left, rect.top);
-        } else {
-          onClick && onClick();
-        }
-      }
-
-      handle.addEventListener("pointermove", onMove);
-      handle.addEventListener("pointerup", onUp);
-    });
+    } catch (e) {
+      console.warn("Librin load:", e);
+    }
+    _historyLoaded = true;
   }
 
-  // ── RENDERIZAR MENSAJES ───────────────────────────────────────────
+  async function saveHistory() {
+    if (!_db || !_getUser || !_bookId) return;
+    const user = _getUser();
+    if (!user) return;
+    try {
+      const ref = window._fbDoc(
+        _db,
+        "users",
+        user.uid,
+        "books",
+        String(_bookId),
+        "librin",
+        "chat",
+      );
+      await window._fbSetDoc(ref, {
+        history: conversationHistory.slice(-30),
+        updated_at: new Date().toISOString(),
+      });
+    } catch (e) {
+      console.warn("Librin save:", e);
+    }
+  }
+
+  function renderHistoryInChat() {
+    chatBox.innerHTML = "";
+    if (!conversationHistory.length) return;
+    const sep = document.createElement("div");
+    sep.className = "lmsg-sep";
+    sep.textContent = "— conversación anterior —";
+    chatBox.appendChild(sep);
+    conversationHistory.forEach((m) => {
+      const el = document.createElement("div");
+      el.className = "lmsg " + (m.role === "user" ? "user" : "bot");
+      el.innerHTML = formatMessage(m.content);
+      chatBox.appendChild(el);
+    });
+    chatBox.scrollTop = chatBox.scrollHeight;
+  }
+
+  // ── MENSAJES ──────────────────────────────────────────────────────
   function formatMessage(text) {
-    const escaped = text
+    const esc = text
       .replace(/&/g, "&amp;")
       .replace(/</g, "&lt;")
       .replace(/>/g, "&gt;");
-    const withBold = escaped.replace(/\*\*(.+?)\*\*/g, "<strong>$1</strong>");
-    const lines = withBold.split("\n").map((line) => {
-      if (/^\d+\.\s/.test(line.trim()))
-        return `<div class="lmsg-li">${line.trim()}</div>`;
-      if (/^[-•]\s/.test(line.trim()))
-        return `<div class="lmsg-li">${line.trim()}</div>`;
-      return line;
-    });
-    return lines.join("<br>").replace(/(<br>\s*){2,}/g, "<br>");
+    const bold = esc.replace(/\*\*(.+?)\*\*/g, "<strong>$1</strong>");
+    return bold
+      .split("\n")
+      .map((l) =>
+        /^\d+\.\s|^[-•]\s/.test(l.trim())
+          ? `<div class="lmsg-li">${l.trim()}</div>`
+          : l,
+      )
+      .join("<br>")
+      .replace(/(<br>\s*){2,}/g, "<br>");
   }
 
-  function addMessage(text, role) {
-    const msg = document.createElement("div");
-    msg.className = "lmsg " + role;
-    msg.innerHTML = formatMessage(text);
-    chatBox.appendChild(msg);
+  function addMsg(text, role) {
+    const el = document.createElement("div");
+    el.className = "lmsg " + role;
+    el.innerHTML = formatMessage(text);
+    chatBox.appendChild(el);
     chatBox.scrollTop = chatBox.scrollHeight;
-    return msg;
+    return el;
   }
 
   function addTyping() {
-    const msg = document.createElement("div");
-    msg.className = "lmsg typing";
-    msg.innerHTML =
+    const el = document.createElement("div");
+    el.className = "lmsg typing";
+    el.innerHTML =
       '<div class="typing-dots"><span></span><span></span><span></span></div>';
-    chatBox.appendChild(msg);
+    chatBox.appendChild(el);
     chatBox.scrollTop = chatBox.scrollHeight;
-    return msg;
+    return el;
   }
 
   // ── SEND ──────────────────────────────────────────────────────────
-  async function sendMessage(overrideQuestion) {
+  async function sendMessage(override) {
     const text = (textArea.value || "").trim();
     const question = (
-      overrideQuestion !== undefined
-        ? overrideQuestion
-        : questionInput.value || ""
+      override !== undefined ? override : qInput.value || ""
     ).trim();
     if (!question && !text) return;
 
-    const displayQuestion = question || "Analiza este texto";
-    addMessage(displayQuestion, "user");
-    questionInput.value = "";
+    addMsg(question || "Analiza este texto", "user");
+    qInput.value = "";
+    conversationHistory.push({
+      role: "user",
+      content: question || "Analiza este texto",
+    });
 
-    // Registrar en historial
-    conversationHistory.push({ role: "user", content: displayQuestion });
-
-    const typingEl = addTyping();
+    const typing = addTyping();
     sendBtn.disabled = true;
 
     try {
@@ -249,101 +296,110 @@
           history: conversationHistory.slice(-10),
         }),
       });
-
       let data;
       try {
         data = await resp.json();
-      } catch (e) {
-        const raw = await resp.text().catch(() => "");
-        throw new Error(raw || "Error de red");
+      } catch {
+        throw new Error(await resp.text().catch(() => "Error de red"));
       }
 
-      typingEl.remove();
-      if (!resp.ok)
-        throw new Error(data?.detail || data?.error || "Error de red");
+      typing.remove();
+      if (!resp.ok) throw new Error(data?.detail || data?.error || "Error");
 
       const answer = data.answer || "Sin respuesta";
-      addMessage(answer, "bot");
-
-      // Guardar respuesta en historial
+      addMsg(answer, "bot");
       conversationHistory.push({ role: "assistant", content: answer });
-      if (conversationHistory.length > 20)
-        conversationHistory = conversationHistory.slice(-20);
+      if (conversationHistory.length > 30)
+        conversationHistory = conversationHistory.slice(-30);
+      saveHistory();
     } catch (err) {
-      typingEl.remove();
-      addMessage("Algo falló: " + err.message, "bot");
+      typing.remove();
+      addMsg("Error: " + err.message, "bot");
     } finally {
       sendBtn.disabled = false;
-      questionInput.focus();
+      qInput.focus();
     }
   }
 
   sendBtn.addEventListener("click", () => sendMessage());
-  questionInput.addEventListener("keydown", (e) => {
+  qInput.addEventListener("keydown", (e) => {
     if (e.key === "Enter" && !e.shiftKey) {
       e.preventDefault();
       sendMessage();
     }
   });
-
-  // ── CHIPS ─────────────────────────────────────────────────────────
-  document.querySelectorAll(".librin-chip").forEach((chip) => {
-    chip.addEventListener("click", () =>
-      sendMessage(chip.dataset.prompt || ""),
+  document
+    .querySelectorAll(".librin-chip")
+    .forEach((c) =>
+      c.addEventListener("click", () => sendMessage(c.dataset.prompt || "")),
     );
-  });
 
   // ── EPUB HOOKS ────────────────────────────────────────────────────
-  function attachSelectionListeners(contents) {
-    const doc = contents?.document;
-    const win = doc?.defaultView;
-    if (!doc || !win) return;
-    doc.addEventListener("selectionchange", () => {
-      const txt = win.getSelection()?.toString()?.trim();
-      if (txt) selectionText = txt;
+  function attachSelection(contents) {
+    const d = contents?.document,
+      w = d?.defaultView;
+    if (!d || !w) return;
+    d.addEventListener("selectionchange", () => {
+      const t = w.getSelection()?.toString()?.trim();
+      if (t) selectionText = t;
     });
   }
 
-  window.initLibrinHooks = (rendition) => {
+  window.initLibrinHooks = (rendition, ctx = {}) => {
     if (!rendition) return;
+    _db = ctx.db || null;
+    _getUser = ctx.getUser || null;
+    _bookId = ctx.bookId || null;
+    _historyLoaded = false;
+
+    chatBox.innerHTML = "";
+    conversationHistory = [];
     selectionText = "";
+
+    // Mostrar FAB en su posición por defecto (abajo derecha, via CSS)
     if (fab) {
       fab.style.display = "flex";
-      applyFabPos();
+      fab.style.left = "";
+      fab.style.top = "";
+      positionFab();
     }
 
-    rendition.on("rendered", (_section, contents) => {
+    // Resetear posición del panel para que se recalcule al abrir
+    panel.style.left = "";
+    panel.style.top = "";
+    panel.style.right = "";
+    panel.style.bottom = "";
+
+    rendition.on("rendered", (_, contents) => {
       try {
         currentContext.visibleText = (
           contents?.document?.body?.innerText || ""
         ).slice(0, 4000);
-      } catch (e) {}
-      attachSelectionListeners(contents);
+      } catch {}
+      attachSelection(contents);
     });
 
     rendition.on("relocated", (loc) => {
       currentContext.pageLabel = loc?.start?.displayed?.page
-        ? "Página " +
-          loc.start.displayed.page +
-          "/" +
-          (loc.start.displayed.total || "?")
+        ? `Página ${loc.start.displayed.page}/${loc.start.displayed.total || "?"}`
         : "";
     });
 
     rendition.on("selected", (cfi, contents) => {
-      const txt = contents.range(cfi)?.toString()?.trim();
-      if (txt) {
-        selectionText = txt;
-        if (panel.classList.contains("open")) textArea.value = txt;
+      const t = contents.range(cfi)?.toString()?.trim();
+      if (t) {
+        selectionText = t;
+        if (panel.classList.contains("open")) textArea.value = t;
       }
     });
   };
 
-  // Limpiar historial al cambiar de libro
   window.hideLibrinFab = () => {
     selectionText = "";
     conversationHistory = [];
+    _historyLoaded = false;
+    chatBox.innerHTML = "";
     if (fab) fab.style.display = "none";
-    closeModal();
+    closePanel();
   };
 })();
