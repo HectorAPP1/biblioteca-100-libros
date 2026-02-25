@@ -1123,10 +1123,10 @@
           gap: 10px;
           z-index: 5;
           justify-content: space-between;
-          flex-wrap: wrap;
+          flex-wrap: nowrap;
           padding-bottom: calc(env(safe-area-inset-bottom, 0px) + 14px);
           background: linear-gradient(180deg, rgba(20, 18, 14, 0.94), rgba(20, 18, 14, 0.98));
-          align-content: flex-start;
+          align-items: center;
         }
 
         .reader-title {
@@ -1198,24 +1198,27 @@
           top: 150px;
         }
 
+        /* Solo mostrar anterior / tipografía / siguiente en iPhone */
+        .reader-bar .rbtn {
+          display: none;
+          font-size: 0.78rem;
+          padding: 10px 8px;
+          min-width: auto;
+        }
+
         #r-prev,
         #r-next,
         #r-type-mobile {
-          order: 2;
-          flex: 1 1 calc(33% - 12px);
+          display: flex;
+          flex: 1 1 33%;
           justify-content: center;
         }
 
         #r-font-inc,
         #r-font-dec,
-        #r-bold {
+        #r-bold,
+        #r-swipe {
           display: none;
-        }
-
-        .rbtn {
-          font-size: 0.72rem;
-          padding: 6px 10px;
-          min-width: 72px;
         }
 
         #screen-reader {
