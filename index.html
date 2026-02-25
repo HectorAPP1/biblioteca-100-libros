@@ -862,6 +862,7 @@
       align-items: center;
       gap: 12px;
       flex-shrink: 0;
+      touch-action: manipulation;
     }
 
     .reader-title {
@@ -880,6 +881,8 @@
       cursor: pointer;
       font-family: 'DM Sans', sans-serif;
       transition: all 0.15s;
+      touch-action: manipulation;
+      -webkit-tap-highlight-color: transparent;
     }
 
     .rbtn:hover {
@@ -1821,13 +1824,14 @@
       const [c1, c2] = b.c;
       const isRead = bs.is_read;
       const hasEpub = !!bs.drive_file_id;
+      const cover = bs.cover_data_url;
 
       return `
     <div class="bcard ${isRead ? 'is-read' : ''} ${hasEpub ? 'has-epub' : ''}"
          style="animation-delay:${idx * 0.03}s"
          onclick="openBookModal(${b.id})">
       <div class="bcard-spine">
-        <div class="spine-bg" style="background:linear-gradient(145deg,${c1},${c2})"></div>
+        <div class="spine-bg" style="${cover ? `background-image:url('${cover}');background-size:cover;background-position:center;` : `background:linear-gradient(145deg,${c1},${c2})`}"></div>
         <span class="spine-num">#${b.n}</span>
         <div class="spine-badge ${isRead ? 'badge-read' : hasEpub ? 'badge-epub' : 'badge-none'}">
           ${isRead ? '✓' : hasEpub ? '📄' : '·'}
@@ -1856,6 +1860,7 @@
       const bs = userBooksCache[id] || {};
       const [c1, c2] = b.c;
       const hasEpub = !!bs.drive_file_id;
+      const cover = bs.cover_data_url;
 
       document.getElementById('m-title').textContent = b.title;
       document.getElementById('m-author').textContent = b.author;
@@ -1870,7 +1875,7 @@
     <div class="book-detail-grid">
       <div>
         <div class="book-cover-big">
-          <div style="position:absolute;inset:0;background:linear-gradient(145deg,${c1},${c2})"></div>
+          <div style="position:absolute;inset:0;${cover ? `background:url('${cover}') center/cover;` : `background:linear-gradient(145deg,${c1},${c2});`}"></div>
           <div style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center;padding:20px;">
             <div style="font-family:'Playfair Display',serif;font-size:0.9rem;color:white;text-align:center;line-height:1.4;text-shadow:0 1px 4px rgba(0,0,0,0.5);">${b.title}</div>
           </div>
@@ -2011,19 +2016,35 @@
       const publicUrl = bs.drive_public_url || `https://drive.google.com/uc?export=download&id=${bs.drive_file_id}`;
       showToast('Descargando ePub...');
       try {
-        const headers = driveToken ? { Authorization: `Bearer ${driveToken}` } : {};
-        const res = await fetch(publicUrl, Object.keys(headers).length ? { headers } : {});
-        if (!res.ok) throw new Error('No se pudo descargar');
-        const blob = await res.blob();
-        const url = URL.createObjectURL(blob);
+        // Preferir la API de Drive con token (evita CORS)
+        if (driveToken) {
+          const res = await fetch(`https://www.googleapis.com/drive/v3/files/${bs.drive_file_id}?alt=media`, {
+            headers: { Authorization: `Bearer ${driveToken}` }
+          });
+          if (!res.ok) throw new Error('No se pudo descargar con token');
+          const blob = await res.blob();
+          const url = URL.createObjectURL(blob);
+          const a = document.createElement('a');
+          a.href = url;
+          a.download = bs.drive_file_name || 'libro.epub';
+          document.body.appendChild(a);
+          a.click();
+          a.remove();
+          URL.revokeObjectURL(url);
+          showToast('✓ ePub descargado', 'success');
+          return;
+        }
+
+        // Sin token: abrir el enlace público directamente (evita fetch/CORS)
         const a = document.createElement('a');
-        a.href = url;
+        a.href = publicUrl;
+        a.target = '_blank';
+        a.rel = 'noopener';
         a.download = bs.drive_file_name || 'libro.epub';
         document.body.appendChild(a);
         a.click();
         a.remove();
-        URL.revokeObjectURL(url);
-        showToast('✓ ePub descargado', 'success');
+        showToast('Abriendo descarga pública...', 'success');
       } catch (e) {
         console.error('Download error:', e);
         showToast('Error al descargar ePub', 'error');
@@ -2135,6 +2156,21 @@
         epubBook.ready.then(() => epubBook.locations.generate(1600)).then(async () => {
           locationsReady = true;
           if (cfi) { await updatePctForCfi(cfi); }
+          // Guardar portada si no existe
+          if (currentBookId && !bs.cover_data_url) {
+            try {
+              const coverUrl = await epubBook.coverUrl();
+              if (coverUrl) {
+                const resp = await fetch(coverUrl);
+                const blob = await resp.blob();
+                const dataUrl = await new Promise(res => { const fr = new FileReader(); fr.onload = () => res(fr.result); fr.readAsDataURL(blob); });
+                userBooksCache[currentBookId] = { ...(userBooksCache[currentBookId] || {}), cover_data_url: dataUrl };
+                await saveBookData(currentBookId, { cover_data_url: dataUrl });
+              }
+            } catch (e) {
+              console.warn('No se pudo extraer portada:', e);
+            }
+          }
         }).catch(e => console.error("Location generation err:", e));
 
         document.getElementById('r-prev').onclick = () => epubRendition.prev();
