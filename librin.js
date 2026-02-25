@@ -1,28 +1,29 @@
 (() => {
-  const fab = document.getElementById('librin-fab');
-  const modalBg = document.getElementById('librin-modal');
-  const textArea = document.getElementById('librin-text');
-  const questionInput = document.getElementById('librin-question');
-  const answerBox = document.getElementById('librin-answer');
-  const sendBtn = document.getElementById('librin-send');
+  const fab = document.getElementById("librin-fab");
+  const modalBg = document.getElementById("librin-modal");
+  const textArea = document.getElementById("librin-text");
+  const questionInput = document.getElementById("librin-question");
+  const answerBox = document.getElementById("librin-answer");
+  const sendBtn = document.getElementById("librin-send");
 
-  if (!fab || !modalBg || !textArea || !questionInput || !answerBox || !sendBtn) return;
+  if (!fab || !modalBg || !textArea || !questionInput || !answerBox || !sendBtn)
+    return;
 
-  let selectionText = '';
+  let selectionText = "";
   let allowFab = false;
 
   function closeModal() {
-    modalBg.classList.remove('open');
-    document.body.style.overflow = '';
+    modalBg.classList.remove("open");
+    document.body.style.overflow = "";
   }
 
   function openModal() {
     if (!selectionText) return;
     textArea.value = selectionText;
-    questionInput.value = '';
-    answerBox.textContent = '';
-    modalBg.classList.add('open');
-    document.body.style.overflow = 'hidden';
+    questionInput.value = "";
+    answerBox.textContent = "";
+    modalBg.classList.add("open");
+    document.body.style.overflow = "hidden";
   }
 
   window.openLibrinModalFromSelection = () => {
@@ -36,7 +37,7 @@
 
   window.closeLibrinModal = closeModal;
 
-  modalBg.addEventListener('click', (e) => {
+  modalBg.addEventListener("click", (e) => {
     if (e.target === modalBg) closeModal();
   });
 
@@ -44,18 +45,25 @@
     const text = textArea.value.trim();
     const question = questionInput.value.trim();
     if (!text) return;
-    answerBox.textContent = 'Consultando a Librin...';
+    answerBox.textContent = "Consultando a Librin...";
     try {
-      const resp = await fetch('/api/librin', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+      const resp = await fetch("/api/librin", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ text, question }),
       });
-      const data = await resp.json();
-      if (!resp.ok) throw new Error(data?.error || 'Error de red');
-      answerBox.textContent = data.answer || 'Sin respuesta';
+      let data;
+      try {
+        data = await resp.json();
+      } catch (e) {
+        const raw = await resp.text().catch(() => "");
+        throw new Error(raw || "Error de red");
+      }
+      if (!resp.ok)
+        throw new Error(data?.detail || data?.error || "Error de red");
+      answerBox.textContent = data.answer || "Sin respuesta";
     } catch (err) {
-      answerBox.textContent = 'Error: ' + err.message;
+      answerBox.textContent = "Error: " + err.message;
     }
   };
 
@@ -64,19 +72,19 @@
     const win = doc?.defaultView;
     if (!doc || !win) return;
 
-    doc.addEventListener('selectionchange', () => {
+    doc.addEventListener("selectionchange", () => {
       if (!allowFab) return;
       const txt = win.getSelection()?.toString()?.trim();
       if (txt) {
         selectionText = txt;
-        fab.style.display = 'block';
+        fab.style.display = "block";
       }
     });
   }
 
   function clearSelectionUI() {
-    selectionText = '';
-    fab.style.display = 'none';
+    selectionText = "";
+    fab.style.display = "none";
   }
 
   window.initLibrinHooks = (rendition) => {
@@ -84,16 +92,16 @@
     allowFab = true;
     clearSelectionUI();
 
-    rendition.on('rendered', (_section, contents) => {
+    rendition.on("rendered", (_section, contents) => {
       attachSelectionListeners(contents);
     });
 
-    rendition.on('selected', (cfi, contents) => {
+    rendition.on("selected", (cfi, contents) => {
       const range = contents.range(cfi);
       const txt = range?.toString()?.trim();
       if (txt) {
         selectionText = txt;
-        fab.style.display = 'block';
+        fab.style.display = "block";
         openModal();
       }
     });
