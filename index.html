@@ -999,6 +999,15 @@
         z-index: 6;
       }
 
+      #r-swipe {
+        position: fixed;
+        top: 46px;
+        right: 12px;
+        z-index: 6;
+        font-size: 0.68rem;
+        padding: 6px 8px;
+      }
+
       #r-prev,
       #r-next {
         order: 2;
@@ -1013,12 +1022,12 @@
       }
 
       #screen-reader {
-        padding-top: 60px;
+        padding-top: 90px;
         padding-bottom: calc(105px + env(safe-area-inset-bottom, 0px));
       }
 
       #epub-viewport {
-        height: calc(100vh - (105px + env(safe-area-inset-bottom, 0px)));
+        height: calc(100vh - (90px + 105px + env(safe-area-inset-bottom, 0px)));
         min-height: 0;
         padding: 6px 8px 10px;
       }
@@ -1338,6 +1347,7 @@
       <span class="reader-title" id="reader-title"></span>
       <button class="rbtn" id="r-prev">‹ Anterior</button>
       <button class="rbtn" id="r-next">Siguiente ›</button>
+      <button class="rbtn" id="r-swipe">Bloquear scroll</button>
       <button class="rbtn gold" id="r-toc">Índice</button>
       <span class="reader-loc" id="reader-loc"></span>
     </div>
@@ -2363,9 +2373,16 @@
           swipeLayer.style.inset = '0';
           swipeLayer.style.zIndex = '4';
           swipeLayer.style.background = 'transparent';
-          swipeLayer.style.touchAction = 'pan-y'; // dejar el scroll vertical libre
           viewportEl.appendChild(swipeLayer);
         }
+        let allowVerticalScroll = true;
+        const applySwipeMode = () => {
+          swipeLayer.style.touchAction = allowVerticalScroll ? 'pan-y' : 'none';
+          swipeLayer.style.pointerEvents = 'auto';
+          document.getElementById('r-swipe').textContent = allowVerticalScroll ? 'Bloquear scroll' : 'Scroll bloqueado';
+        };
+        applySwipeMode();
+
         let startX = null; let startY = null;
         const resetSwipe = () => { startX = null; startY = null; };
         swipeLayer.onpointerdown = (e) => { startX = e.clientX; startY = e.clientY; };
@@ -2379,6 +2396,13 @@
           resetSwipe();
         };
         swipeLayer.onpointerleave = resetSwipe;
+
+        document.getElementById('r-swipe').onclick = () => {
+          allowVerticalScroll = !allowVerticalScroll;
+          applySwipeMode();
+          // Bloquear scroll del body cuando se bloquea el vertical
+          document.body.style.overflow = allowVerticalScroll ? '' : 'hidden';
+        };
       } catch (e) {
         document.getElementById('epub-viewport').innerHTML =
           `<div style="color:var(--danger);text-align:center;padding:60px;font-size:0.85rem;">Excepción al inicializar el lector: ${e.message}</div>`;
