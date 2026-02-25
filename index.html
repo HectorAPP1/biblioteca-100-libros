@@ -863,6 +863,7 @@
       gap: 12px;
       flex-shrink: 0;
       touch-action: manipulation;
+      align-content: flex-start;
     }
 
     .reader-title {
@@ -945,24 +946,60 @@
     @media (max-width: 640px) {
       .reader-bar {
         position: fixed;
-        bottom: 0;
+        bottom: max(20px, env(safe-area-inset-bottom, 20px));
         left: 0;
         right: 0;
         height: 90px;
-        padding: 12px 16px 18px;
+        padding: 12px 16px 16px;
         gap: 10px;
         z-index: 5;
         justify-content: space-between;
         flex-wrap: wrap;
-        padding-bottom: max(18px, env(safe-area-inset-bottom, 18px));
+        padding-bottom: max(20px, env(safe-area-inset-bottom, 20px));
         background: linear-gradient(180deg, rgba(20, 18, 14, 0.94), rgba(20, 18, 14, 0.98));
+        align-content: flex-start;
       }
 
       .reader-title {
-        flex: 1 1 100%;
-        order: -1;
+        position: fixed;
+        top: 12px;
+        left: 50%;
+        transform: translateX(-50%);
         text-align: center;
-        margin-bottom: 4px;
+        margin: 0;
+        z-index: 6;
+        max-width: 70%;
+      }
+
+      .reader-loc {
+        position: fixed;
+        top: 34px;
+        left: 50%;
+        transform: translateX(-50%);
+        width: auto;
+        margin: 0;
+        z-index: 6;
+      }
+
+      #r-back {
+        position: fixed;
+        top: 10px;
+        left: 12px;
+        z-index: 6;
+      }
+
+      #r-toc {
+        position: fixed;
+        top: 10px;
+        right: 12px;
+        z-index: 6;
+      }
+
+      #r-prev,
+      #r-next {
+        order: 2;
+        flex: 1 1 calc(50% - 12px);
+        justify-content: center;
       }
 
       .rbtn {
@@ -972,11 +1009,12 @@
       }
 
       #screen-reader {
-        padding-bottom: 95px;
+        padding-top: 60px;
+        padding-bottom: 105px;
       }
 
       #epub-viewport {
-        height: calc(100vh - 95px);
+        height: calc(100vh - 105px);
         min-height: 0;
         padding: 6px 8px 10px;
       }
@@ -1292,7 +1330,7 @@
   <!-- ═══════════════ READER ═══════════════ -->
   <div class="screen" id="screen-reader">
     <div class="reader-bar">
-      <button class="rbtn" onclick="closeReader()">← Volver</button>
+      <button class="rbtn" id="r-back" onclick="closeReader()">← Volver</button>
       <span class="reader-title" id="reader-title"></span>
       <button class="rbtn" id="r-prev">‹ Anterior</button>
       <button class="rbtn" id="r-next">Siguiente ›</button>
@@ -1910,8 +1948,8 @@
       <div>
         <div class="book-cover-big">
           <div style="position:absolute;inset:0;${cover ? `background:url('${cover}') center/cover;` : `background:linear-gradient(145deg,${c1},${c2});`}"></div>
-          <button class="bact" style="position:absolute;left:8px;bottom:8px;font-size:0.68rem;padding:6px 8px;background:rgba(0,0,0,0.55);color:white;border:1px solid rgba(255,255,255,0.15);" onclick="triggerCoverUpload(${id});event.stopPropagation();">Cambiar portada</button>
-          <div style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center;padding:20px;">
+          <button class="bact" style="position:absolute;left:8px;bottom:8px;font-size:0.68rem;padding:6px 8px;background:rgba(0,0,0,0.55);color:white;border:1px solid rgba(255,255,255,0.15);cursor:pointer;" onclick="event.stopPropagation();triggerCoverUpload(${id});">Cambiar portada</button>
+          <div style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center;padding:20px;pointer-events:none;${cover ? 'opacity:0;visibility:hidden;' : ''}">
             <div style="font-family:'Playfair Display',serif;font-size:0.9rem;color:white;text-align:center;line-height:1.4;text-shadow:0 1px 4px rgba(0,0,0,0.5);">${b.title}</div>
           </div>
         </div>
