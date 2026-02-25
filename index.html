@@ -1599,12 +1599,17 @@
     }
 
     async function getEpubFromDrive(fileId) {
-      if (!driveToken) { showToast('Conecta Google Drive primero', 'error'); return null; }
+      // Permitir rutas locales o URLs directas (para pruebas con archivos en el proyecto)
+      const isDirectPath = fileId?.toLowerCase().endsWith('.epub') || /^https?:\/\//.test(fileId || '');
+
+      const fetchUrl = isDirectPath
+        ? (fileId.startsWith('http') ? fileId : `./${fileId}`)
+        : `https://www.googleapis.com/drive/v3/files/${fileId}?alt=media`;
+
+      if (!isDirectPath && !driveToken) { showToast('Conecta Google Drive primero', 'error'); return null; }
       showToast('Descargando desde Drive...');
       try {
-        const res = await fetch(`https://www.googleapis.com/drive/v3/files/${fileId}?alt=media`, {
-          headers: { Authorization: `Bearer ${driveToken}` }
-        });
+        const res = await fetch(fetchUrl, isDirectPath ? {} : { headers: { Authorization: `Bearer ${driveToken}` } });
         if (!res.ok) throw new Error('No se pudo descargar');
         const blob = await res.blob();
         const fileUrl = URL.createObjectURL(blob);
@@ -1891,7 +1896,8 @@
       try {
         if (epubRendition) { try { epubRendition.destroy(); } catch (e) { } }
 
-        if (!buf || buf.length < 500) {
+        const isArrayBuffer = typeof ArrayBuffer !== 'undefined' && buf instanceof ArrayBuffer;
+        if (!buf || (isArrayBuffer && buf.byteLength < 500)) {
           let msg = 'El archivo descargado es demasiado pequeño o no pudo ser convertido, puede que no sea un ePub válido o esté corrupto.';
           document.getElementById('epub-viewport').innerHTML = `<div style="color:var(--danger);text-align:center;padding:60px;">${msg}</div>`;
           return;
