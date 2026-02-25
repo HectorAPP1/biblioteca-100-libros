@@ -901,6 +901,39 @@
       margin-left: auto;
     }
 
+    /* Page flip micro-effect */
+    @keyframes flipLeft {
+      from {
+        transform: translateX(-10px) rotateY(-8deg);
+        opacity: 0.9;
+      }
+
+      to {
+        transform: translateX(0) rotateY(0);
+        opacity: 1;
+      }
+    }
+
+    @keyframes flipRight {
+      from {
+        transform: translateX(10px) rotateY(8deg);
+        opacity: 0.9;
+      }
+
+      to {
+        transform: translateX(0) rotateY(0);
+        opacity: 1;
+      }
+    }
+
+    #epub-viewport.flip-left {
+      animation: flipLeft 0.18s ease;
+    }
+
+    #epub-viewport.flip-right {
+      animation: flipRight 0.18s ease;
+    }
+
     #epub-viewport {
       width: 100%;
       height: calc(100vh - 48px);
@@ -1328,6 +1361,7 @@
   <!-- Hidden file input -->
   <input type="file" id="file-input" accept=".epub" style="display:none">
   <input type="file" id="file-input-local" accept=".epub" style="display:none">
+  <input type="file" id="file-input-cover" accept="image/*" style="display:none">
 
   <!-- ═══════════════ FIREBASE + APP ═══════════════ -->
   <script type="module">
@@ -1876,6 +1910,7 @@
       <div>
         <div class="book-cover-big">
           <div style="position:absolute;inset:0;${cover ? `background:url('${cover}') center/cover;` : `background:linear-gradient(145deg,${c1},${c2});`}"></div>
+          <button class="bact" style="position:absolute;left:8px;bottom:8px;font-size:0.68rem;padding:6px 8px;background:rgba(0,0,0,0.55);color:white;border:1px solid rgba(255,255,255,0.15);" onclick="triggerCoverUpload(${id});event.stopPropagation();">Cambiar portada</button>
           <div style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center;padding:20px;">
             <div style="font-family:'Playfair Display',serif;font-size:0.9rem;color:white;text-align:center;line-height:1.4;text-shadow:0 1px 4px rgba(0,0,0,0.5);">${b.title}</div>
           </div>
@@ -1997,9 +2032,28 @@
       this.value = '';
     });
 
+    // Subir portada manual
+    window.triggerCoverUpload = (id) => {
+      currentBookId = id;
+      document.getElementById('file-input-cover').click();
+    };
+
+    document.getElementById('file-input-cover').addEventListener('change', async function (e) {
+      const file = e.target.files[0];
+      if (!file || !file.type.startsWith('image/')) return;
+      if (!currentBookId) return;
+      const dataUrl = await new Promise(res => { const fr = new FileReader(); fr.onload = () => res(fr.result); fr.readAsDataURL(file); });
+      userBooksCache[currentBookId] = { ...(userBooksCache[currentBookId] || {}), cover_data_url: dataUrl };
+      await saveBookData(currentBookId, { cover_data_url: dataUrl });
+      renderApp();
+      openBookModal(currentBookId);
+      this.value = '';
+      showToast('Portada actualizada', 'success');
+    });
+
     window.handleDrop = async (e, id) => {
       e.preventDefault();
-      document.getElementById(`upload - zone - ${id} `)?.classList.remove('drag');
+      document.getElementById(`upload-zone-${id}`)?.classList.remove('drag');
       const file = e.dataTransfer.files[0];
       if (!file || !file.name.endsWith('.epub')) { showToast('Solo archivos .epub', 'error'); return; }
       currentBookId = id;
@@ -2173,8 +2227,11 @@
           }
         }).catch(e => console.error("Location generation err:", e));
 
-        document.getElementById('r-prev').onclick = () => epubRendition.prev();
-        document.getElementById('r-next').onclick = () => epubRendition.next();
+        const doPrev = () => { document.getElementById('epub-viewport').classList.add('flip-left'); setTimeout(() => document.getElementById('epub-viewport').classList.remove('flip-left'), 180); epubRendition.prev(); };
+        const doNext = () => { document.getElementById('epub-viewport').classList.add('flip-right'); setTimeout(() => document.getElementById('epub-viewport').classList.remove('flip-right'), 180); epubRendition.next(); };
+
+        document.getElementById('r-prev').onclick = doPrev;
+        document.getElementById('r-next').onclick = doNext;
         document.getElementById('r-toc').onclick = async () => {
           if (!epubBook || !epubBook.navigation || !epubBook.navigation.toc?.length) {
             showToast('No hay índice disponible en este ePub', 'error');
@@ -2253,6 +2310,22 @@
             }
           }
         });
+
+        // Gestos de deslizamiento (touch/mouse) para cambiar página
+        const viewportEl = document.getElementById('epub-viewport');
+        let startX = null; let startY = null;
+        const resetSwipe = () => { startX = null; startY = null; };
+        viewportEl.onpointerdown = (e) => { startX = e.clientX; startY = e.clientY; };
+        viewportEl.onpointerup = (e) => {
+          if (startX === null || startY === null) return resetSwipe();
+          const dx = e.clientX - startX;
+          const dy = Math.abs(e.clientY - startY);
+          if (Math.abs(dx) > 50 && dy < 80) {
+            if (dx > 0) doPrev(); else doNext();
+          }
+          resetSwipe();
+        };
+        viewportEl.onpointerleave = resetSwipe;
       } catch (e) {
         document.getElementById('epub-viewport').innerHTML =
           `<div style="color:var(--danger);text-align:center;padding:60px;font-size:0.85rem;">Excepción al inicializar el lector: ${e.message}</div>`;
