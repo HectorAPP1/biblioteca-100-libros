@@ -2363,6 +2363,7 @@
           swipeLayer.style.inset = '0';
           swipeLayer.style.zIndex = '4';
           swipeLayer.style.background = 'transparent';
+          swipeLayer.style.touchAction = 'pan-y'; // dejar el scroll vertical libre
           viewportEl.appendChild(swipeLayer);
         }
         let startX = null; let startY = null;
@@ -2372,7 +2373,7 @@
           if (startX === null || startY === null) return resetSwipe();
           const dx = e.clientX - startX;
           const dy = Math.abs(e.clientY - startY);
-          if (Math.abs(dx) > 50 && dy < 80) {
+          if (Math.abs(dx) > 60 && dy < 25) {
             if (dx > 0) doPrev(); else doNext();
           }
           resetSwipe();
