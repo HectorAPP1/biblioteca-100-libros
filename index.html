@@ -2453,6 +2453,8 @@
       else returnToModalId = null;
 
       showScreen('reader');
+      const lf = document.getElementById('librin-fab');
+      if (lf) lf.style.display = 'block';
       currentBookId = id;
       if (id) lastModalBookId = id;
 
