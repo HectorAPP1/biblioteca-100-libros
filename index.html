@@ -1277,6 +1277,7 @@
 
   <!-- Hidden file input -->
   <input type="file" id="file-input" accept=".epub" style="display:none">
+  <input type="file" id="file-input-local" accept=".epub" style="display:none">
 
   <!-- ═══════════════ FIREBASE + APP ═══════════════ -->
   <script type="module">
@@ -1737,6 +1738,7 @@
           <button class="bact bact-read ${isRead ? 'on' : ''}" onclick="toggleRead(${b.id})">${isRead ? '✓ Leído' : 'Leer'}</button>
           <button class="bact bact-epub ${hasEpub ? 'on' : ''}" onclick="triggerEpubUpload(${b.id})">${hasEpub ? '📄' : '↑ ePub'}</button>
           ${hasEpub ? `<button class="bact bact-open" onclick="openReader(${b.id})">▶</button>` : ''}
+          ${hasEpub ? `<button class="bact" style="min-width:42px" onclick="downloadEpub(${b.id});event.stopPropagation();">⬇</button>` : ''}
         </div>
       </div>
     </div>`;
@@ -1777,6 +1779,8 @@
             ${hasEpub ? '📄 Reemplazar ePub' : '↑ Subir ePub a Drive'}
           </button>
           ${hasEpub ? `<button class="bact bact-open" style="padding:10px;font-size:0.75rem;" onclick="openReader(${id})">▶ Leer ahora</button>` : ''}
+          ${hasEpub ? `<button class="bact" style="padding:10px;font-size:0.75rem;" onclick="downloadEpub(${id})">⬇ Descargar</button>` : ''}
+          <button class="bact" style="padding:10px;font-size:0.75rem;" onclick="triggerLocalOpen()">📂 Abrir ePub local</button>
         </div>
       </div>
       <div>
@@ -1862,6 +1866,12 @@
       document.getElementById('file-input').click();
     };
 
+    // Abrir ePub local (sin Drive)
+    window.triggerLocalOpen = () => {
+      currentBookId = null;
+      document.getElementById('file-input-local').click();
+    };
+
     document.getElementById('file-input').addEventListener('change', async function (e) {
       const file = e.target.files[0];
       if (!file || !file.name.endsWith('.epub')) return;
@@ -1869,6 +1879,14 @@
       if (!b) return;
       const fileId = await uploadEpubToDrive(file, currentBookId, b.title);
       if (fileId) { renderApp(); if (currentBookId) openBookModal(currentBookId); }
+      this.value = '';
+    });
+
+    document.getElementById('file-input-local').addEventListener('change', async function (e) {
+      const file = e.target.files[0];
+      if (!file || !file.name.endsWith('.epub')) return;
+      const url = URL.createObjectURL(file);
+      await openReader(null, { url, title: file.name, isLocal: true });
       this.value = '';
     });
 
@@ -1884,25 +1902,52 @@
       if (fileId) { renderApp(); openBookModal(id); }
     };
 
-    // ── EPUB READER ──────────────────────────────────────────────
-    window.openReader = async (id) => {
+    // Descargar ePub desde Drive al disco local
+    window.downloadEpub = async (id) => {
       const bs = userBooksCache[id] || {};
+      if (!bs.drive_file_id) { showToast('No hay ePub para este libro', 'error'); return; }
+      if (!driveToken) { showToast('Conecta Google Drive para descargar', 'error'); openDriveModal(); return; }
+      showToast('Descargando ePub...');
+      try {
+        const res = await fetch(`https://www.googleapis.com/drive/v3/files/${bs.drive_file_id}?alt=media`, {
+          headers: { Authorization: `Bearer ${driveToken}` }
+        });
+        if (!res.ok) throw new Error('No se pudo descargar');
+        const blob = await res.blob();
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = bs.drive_file_name || 'libro.epub';
+        document.body.appendChild(a);
+        a.click();
+        a.remove();
+        URL.revokeObjectURL(url);
+        showToast('✓ ePub descargado', 'success');
+      } catch (e) {
+        console.error('Download error:', e);
+        showToast('Error al descargar ePub', 'error');
+      }
+    };
+
+    // ── EPUB READER ──────────────────────────────────────────────
+    window.openReader = async (id, opts = {}) => {
+      const bs = id ? (userBooksCache[id] || {}) : {};
 
       // Fallback local ePub (archivo incluido en el proyecto) si no hay drive_file_id
       const localEpub = 'Pensar_rapido_pensar_despacio_Daniel_Kahneman.epub';
-      const fileId = bs.drive_file_id || localEpub;
+      const fileId = opts.url || bs.drive_file_id || localEpub;
       if (!fileId) { showToast('No hay ePub para este libro', 'error'); return; }
       closeBookModal();
 
-      let buf = await getEpubFromDrive(fileId);
+      let buf = opts.url || await getEpubFromDrive(fileId);
       // Si falla Drive, probar el ePub local incluido
-      if (!buf && fileId !== localEpub) {
+      if (!buf && !opts.url && fileId !== localEpub) {
         buf = await getEpubFromDrive(localEpub);
       }
       if (!buf) return;
 
-      const b = BOOKS.find(x => x.id === id);
-      document.getElementById('reader-title').textContent = b?.title || '';
+      const b = id ? BOOKS.find(x => x.id === id) : null;
+      document.getElementById('reader-title').textContent = opts.title || b?.title || '';
       showScreen('reader');
       currentBookId = id;
 
@@ -1979,7 +2024,9 @@
             } else {
               document.getElementById('reader-loc').textContent = `Leído (${loc?.start?.displayed?.page || 1}/${loc?.start?.displayed?.total || '?'})`;
             }
-            await saveBookData(currentBookId, { current_cfi: locCfi });
+            if (currentBookId) {
+              await saveBookData(currentBookId, { current_cfi: locCfi });
+            }
           }
         });
       } catch (e) {
