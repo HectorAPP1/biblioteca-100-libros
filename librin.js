@@ -92,7 +92,7 @@
 
   function clearSelectionUI() {
     selectionText = "";
-    fab.style.display = "none";
+    if (fab) fab.style.display = "block";
   }
 
   window.initLibrinHooks = (rendition) => {
@@ -125,7 +125,10 @@
   };
 
   // Hide FAB when leaving reader
-  window.hideLibrinFab = () => clearSelectionUI();
+  window.hideLibrinFab = () => {
+    selectionText = "";
+    if (fab) fab.style.display = "none";
+  };
 
   // Mantener el FAB visible para abrir chat manualmente
   if (fab) {
