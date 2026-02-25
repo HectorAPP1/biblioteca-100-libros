@@ -1827,7 +1827,7 @@
         </div>
         <div style="margin-top:14px;display:flex;flex-direction:column;gap:8px;">
           <button class="bact bact-read ${bs.is_read ? 'on' : ''}" style="padding:10px;font-size:0.75rem;" onclick="toggleRead(${id})">
-            ${bs.is_read ? '✓ Marcado como leído' : 'Marcar como leído'}
+            ${bs.is_read ? '✓ leído' : 'Marcar leído'}
           </button>
           <button class="bact bact-epub" style="padding:10px;font-size:0.75rem;" onclick="triggerEpubUpload(${id})">
             ${hasEpub ? '📄 Reemplazar ePub' : '↑ Subir ePub a Drive'}
@@ -2024,6 +2024,8 @@
 
         epubBook = window.ePub();
         await epubBook.open(buf);
+        // Algunos ePub carecen de packaging; evitar TypeError internos de epub.js
+        epubBook.packaging = epubBook.packaging || { metadata: {} };
 
         try {
           await epubBook.ready;
