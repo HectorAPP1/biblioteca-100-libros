@@ -1936,6 +1936,7 @@
       const isRead = bs.is_read;
       const hasEpub = !!bs.drive_file_id;
       const cover = bs.cover_data_url;
+      const hideTitleStyle = cover ? 'display:none;' : '';
 
       return `
     <div class="bcard ${isRead ? 'is-read' : ''} ${hasEpub ? 'has-epub' : ''}"
@@ -1947,10 +1948,10 @@
         <div class="spine-badge ${isRead ? 'badge-read' : hasEpub ? 'badge-epub' : 'badge-none'}">
           ${isRead ? '✓' : hasEpub ? '📄' : '·'}
         </div>
-        <div class="spine-text">${b.title}</div>
+        <div class="spine-text" style="${hideTitleStyle}">${b.title}</div>
       </div>
       <div class="bcard-info">
-        <div class="bcard-title">${b.title}</div>
+        <div class="bcard-title" style="${hideTitleStyle}">${b.title}</div>
         <div class="bcard-author">${b.author}</div>
         <div class="bcard-actions" onclick="event.stopPropagation()">
           <button class="bact bact-read ${isRead ? 'on' : ''}" onclick="toggleRead(${b.id})">${isRead ? '✓ leído' : 'Marcar leído'}</button>
