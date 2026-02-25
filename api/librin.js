@@ -1,5 +1,3 @@
-import fetch from "node-fetch";
-
 export default async function handler(req, res) {
   if (req.method !== "POST") return res.status(405).end();
   const { text, question } = req.body || {};
@@ -28,7 +26,7 @@ export default async function handler(req, res) {
   });
   if (!resp.ok) {
     const err = await resp.text();
-    return res.status(500).json({ error: "Groq error", detail: err });
+    return res.status(resp.status).json({ error: "Groq error", detail: err });
   }
   const data = await resp.json();
   res.status(200).json({ answer: data.choices?.[0]?.message?.content || "" });
