@@ -899,6 +899,43 @@
       overflow: hidden;
     }
 
+    /* Mobile layout: controles fijos abajo y viewport ajustado */
+    @media (max-width: 640px) {
+      .reader-bar {
+        position: fixed;
+        bottom: 0;
+        left: 0;
+        right: 0;
+        height: 62px;
+        padding: 8px 12px;
+        gap: 8px;
+        z-index: 5;
+        justify-content: space-between;
+        flex-wrap: wrap;
+      }
+
+      .reader-title {
+        flex: 1 1 100%;
+        order: -1;
+        text-align: center;
+        margin-bottom: 4px;
+      }
+
+      .rbtn {
+        font-size: 0.72rem;
+        padding: 6px 10px;
+      }
+
+      #screen-reader {
+        padding-bottom: 62px;
+      }
+
+      #epub-viewport {
+        height: calc(100vh - 62px);
+        min-height: 0;
+      }
+    }
+
     /* DRIVE MODAL */
     .drive-modal {
       max-width: 480px;
@@ -1316,6 +1353,8 @@
     let currentFilter = 'all';
     let searchQuery = '';
     let currentBookId = null;
+    let lastModalBookId = null; // última ficha abierta (para persistencia menor)
+    let returnToModalId = null; // record de si el lector se abrió desde modal
     let epubBook = null;
     let epubRendition = null;
 
@@ -1800,6 +1839,8 @@
     // ── BOOK MODAL ───────────────────────────────────────────────
     window.openBookModal = (id) => {
       currentBookId = id;
+      lastModalBookId = id;
+      returnToModalId = null;
       const b = BOOKS.find(x => x.id === id);
       if (!b) return;
       const bs = userBooksCache[id] || {};
@@ -2000,8 +2041,13 @@
 
       const b = id ? BOOKS.find(x => x.id === id) : null;
       document.getElementById('reader-title').textContent = opts.title || b?.title || '';
+      const modalWasOpen = document.getElementById('book-modal').classList.contains('open');
+      if (modalWasOpen) returnToModalId = id;
+      else returnToModalId = null;
+
       showScreen('reader');
       currentBookId = id;
+      if (id) lastModalBookId = id;
 
       if (!window.JSZip) {
         await loadScript('https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js');
@@ -2094,7 +2140,12 @@
 
     window.closeReader = () => {
       if (epubRendition) { try { epubRendition.destroy(); } catch (e) { } epubRendition = null; epubBook = null; }
-      showScreen('app');
+      if (returnToModalId) {
+        showScreen('app');
+        openBookModal(returnToModalId);
+      } else {
+        showScreen('app');
+      }
     };
 
     function loadScript(src) {
