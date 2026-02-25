@@ -1885,6 +1885,27 @@
 
         epubBook = window.ePub();
         await epubBook.open(buf, "binary");
+
+        try {
+          await epubBook.ready;
+          if (!epubBook.packaging || !epubBook.packaging.metadata) {
+            throw new Error("El archivo no tiene índice estándar (metadata/packaging ausente)");
+          }
+        } catch (err) {
+          document.getElementById('epub-viewport').innerHTML =
+            `<div style="color:var(--danger);text-align:center;padding:40px 20px;">
+                <p><b>Este archivo ePub no puede ser leído por el visualizador.</b></p>
+                <p style="font-size:0.85rem;color:var(--muted2);max-width:400px;margin:15px auto;">
+                  Algunos ePubs descargados o convertidos tienen índices rotos y un empaquetado interno que <i>epub.js</i> no logra desenredar. 
+                </p>
+                <p style="font-size:0.75rem;color:var(--muted);margin-top:20px;">Detalle técnico: ${err.message || 'Error de parseo del manifiesto'}</p>
+             </div>`;
+          // Delete the invalid book instance so further errors don't trigger
+          epubBook.destroy();
+          epubBook = null;
+          return;
+        }
+
         const viewport = document.getElementById('epub-viewport');
         viewport.innerHTML = '';
 
