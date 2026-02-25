@@ -1008,6 +1008,28 @@
         padding: 6px 8px;
       }
 
+      #r-font-inc,
+      #r-font-dec,
+      #r-bold {
+        position: fixed;
+        right: 12px;
+        z-index: 6;
+        font-size: 0.68rem;
+        padding: 6px 8px;
+      }
+
+      #r-font-inc {
+        top: 82px;
+      }
+
+      #r-font-dec {
+        top: 116px;
+      }
+
+      #r-bold {
+        top: 150px;
+      }
+
       #r-prev,
       #r-next {
         order: 2;
@@ -1022,12 +1044,12 @@
       }
 
       #screen-reader {
-        padding-top: 90px;
+        padding-top: 170px;
         padding-bottom: calc(105px + env(safe-area-inset-bottom, 0px));
       }
 
       #epub-viewport {
-        height: calc(100vh - (90px + 105px + env(safe-area-inset-bottom, 0px)));
+        height: calc(100vh - (170px + 105px + env(safe-area-inset-bottom, 0px)));
         min-height: 0;
         padding: 6px 8px 10px;
       }
@@ -1347,6 +1369,9 @@
       <span class="reader-title" id="reader-title"></span>
       <button class="rbtn" id="r-prev">‹ Anterior</button>
       <button class="rbtn" id="r-next">Siguiente ›</button>
+      <button class="rbtn" id="r-font-dec">A-</button>
+      <button class="rbtn" id="r-font-inc">A+</button>
+      <button class="rbtn" id="r-bold">Normal</button>
       <button class="rbtn" id="r-swipe">Bloquear scroll</button>
       <button class="rbtn gold" id="r-toc">Índice</button>
       <span class="reader-loc" id="reader-loc"></span>
@@ -2282,6 +2307,24 @@
         const doPrev = () => { document.getElementById('epub-viewport').classList.add('flip-left'); setTimeout(() => document.getElementById('epub-viewport').classList.remove('flip-left'), 180); epubRendition.prev(); };
         const doNext = () => { document.getElementById('epub-viewport').classList.add('flip-right'); setTimeout(() => document.getElementById('epub-viewport').classList.remove('flip-right'), 180); epubRendition.next(); };
 
+        // Tipografía (tamaño y peso)
+        let fontScale = 1.0;
+        let isBold = false;
+        const applyTypography = () => {
+          if (!epubRendition || !epubRendition.themes) return;
+          const sizePct = Math.round(fontScale * 100);
+          epubRendition.themes.override('body', {
+            'font-size': `${sizePct}%`,
+            'font-weight': isBold ? '600' : '400',
+            'line-height': '1.55',
+            'letter-spacing': '0.01em'
+          });
+          document.getElementById('r-bold').textContent = isBold ? 'Negrita' : 'Normal';
+        };
+        document.getElementById('r-font-inc').onclick = () => { fontScale = Math.min(1.6, fontScale + 0.05); applyTypography(); };
+        document.getElementById('r-font-dec').onclick = () => { fontScale = Math.max(0.85, fontScale - 0.05); applyTypography(); };
+        document.getElementById('r-bold').onclick = () => { isBold = !isBold; applyTypography(); };
+
         document.getElementById('r-prev').onclick = doPrev;
         document.getElementById('r-next').onclick = doNext;
         document.getElementById('r-toc').onclick = async () => {
@@ -2382,6 +2425,7 @@
           document.getElementById('r-swipe').textContent = allowVerticalScroll ? 'Bloquear scroll' : 'Scroll bloqueado';
         };
         applySwipeMode();
+        applyTypography();
 
         let startX = null; let startY = null;
         const resetSwipe = () => { startX = null; startY = null; };
