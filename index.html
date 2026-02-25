@@ -1864,7 +1864,7 @@
       currentBookId = id;
 
       if (!window.JSZip) {
-        await loadScript('https://cdnjs.cloudflare.com/ajax/libs/jszip/3.1.5/jszip.min.js');
+        await loadScript('https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js');
       }
       if (!window.ePub) {
         await loadScript('https://cdn.jsdelivr.net/npm/epubjs/dist/epub.min.js');
@@ -1884,7 +1884,7 @@
         }
 
         epubBook = window.ePub();
-        await epubBook.open(buf, "binary");
+        await epubBook.open(buf);
 
         try {
           await epubBook.ready;
