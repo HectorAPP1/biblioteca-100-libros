@@ -966,225 +966,204 @@
       min-height: 500px;
       overflow: hidden;
       position: relative;
-    }
 
-    /* Desktop reader layout */
-    @media (min-width: 1024px) {
-      #screen-reader {
-        padding: 0;
+      /* Desktop reader layout */
+      @media (min-width: 1024px) {
+        #screen-reader {
+          padding-top: 80px;
+          padding-bottom: 110px;
+        }
+
+        #epub-viewport {
+          height: calc(100vh - (80px + 110px));
+          padding: 16px 20px 16px;
+        }
+
+        .reader-bar {
+          position: fixed;
+          bottom: 0;
+          left: 0;
+          right: 0;
+          height: 84px;
+          padding: 14px 22px 18px;
+          gap: 12px;
+          z-index: 5;
+          justify-content: space-between;
+          display: flex;
+          align-items: center;
+          flex-wrap: wrap;
+          background: linear-gradient(180deg, rgba(20, 18, 14, 0.94), rgba(20, 18, 14, 0.98));
+          border-top: 1px solid rgba(201, 168, 76, 0.18);
+        }
+
+        #r-back {
+          position: fixed;
+          top: 18px;
+          left: 18px;
+          background: rgba(0, 0, 0, 0.65);
+          color: #f7f7f7;
+          border-color: rgba(0, 0, 0, 0.4);
+          z-index: 6;
+        }
+
+        #r-toc {
+          position: fixed;
+          top: 18px;
+          right: 18px;
+          z-index: 6;
+        }
+
+        .reader-title {
+          position: fixed;
+          top: 18px;
+          left: 50%;
+          transform: translateX(-50%);
+          max-width: 60%;
+          text-align: center;
+          z-index: 6;
+        }
+
+        .reader-loc {
+          position: fixed;
+          top: 44px;
+          left: 50%;
+          transform: translateX(-50%);
+          z-index: 6;
+        }
+
+        #r-prev,
+        #r-next,
+        #r-type-mobile {
+          order: 2;
+          flex: 1 1 calc(33% - 12px);
+          justify-content: center;
+        }
+
+        #r-font-inc,
+        #r-font-dec,
+        #r-bold,
+        #r-swipe {
+          display: none;
+        }
       }
 
-      #epub-viewport {
-        height: calc(100vh - 0px);
-        padding: 16px 10px 64px;
-      }
+      /* Mobile layout: controles fijos abajo y viewport ajustado */
+      @media (max-width: 640px) {
+        .reader-bar {
+          position: fixed;
+          bottom: 0;
+          left: 0;
+          right: 0;
+          height: 90px;
+          padding: 12px 16px 16px;
+          gap: 10px;
+          z-index: 5;
+          justify-content: space-between;
+          flex-wrap: wrap;
+          padding-bottom: calc(env(safe-area-inset-bottom, 0px) + 14px);
+          background: linear-gradient(180deg, rgba(20, 18, 14, 0.94), rgba(20, 18, 14, 0.98));
+          align-content: flex-start;
+        }
 
-      .reader-bar {
-        position: absolute;
-        inset: 0;
-        background: none;
-        border: none;
-        height: auto;
-        padding: 0;
-        pointer-events: none;
-      }
+        .reader-title {
+          position: fixed;
+          top: 12px;
+          left: 50%;
+          transform: translateX(-50%);
+          text-align: center;
+          margin: 0;
+          z-index: 6;
+          max-width: 70%;
+        }
 
-      .reader-bar .rbtn,
-      .reader-loc,
-      .reader-title {
-        pointer-events: auto;
-      }
+        .reader-loc {
+          position: fixed;
+          top: 34px;
+          left: 50%;
+          transform: translateX(-50%);
+          width: auto;
+          margin: 0;
+          z-index: 6;
+        }
 
-      #r-back {
-        position: absolute;
-        top: 18px;
-        left: 18px;
-        background: rgba(0, 0, 0, 0.65);
-        color: #f7f7f7;
-        border-color: rgba(0, 0, 0, 0.4);
-      }
+        #r-back {
+          position: fixed;
+          top: 10px;
+          left: 12px;
+          z-index: 6;
+          background: rgba(30, 30, 30, 0.92);
+          color: #f8f8f8;
+          border-color: rgba(0, 0, 0, 0.35);
+        }
 
-      #r-toc {
-        position: absolute;
-        top: 18px;
-        right: 18px;
-      }
+        #r-toc {
+          position: fixed;
+          top: 10px;
+          right: 12px;
+          z-index: 6;
+        }
 
-      #r-font-inc,
-      #r-font-dec,
-      #r-bold {
-        position: absolute;
-        top: 18px;
-        right: 18px;
-        transform: translateY(calc(var(--i, 0) * 34px));
-      }
+        #r-swipe {
+          position: fixed;
+          top: 46px;
+          right: 12px;
+          z-index: 6;
+          font-size: 0.68rem;
+          padding: 6px 8px;
+        }
 
-      #r-font-inc {
-        --i: 1;
-      }
+        #r-font-inc,
+        #r-font-dec,
+        #r-bold {
+          position: fixed;
+          right: 12px;
+          z-index: 6;
+          font-size: 0.68rem;
+          padding: 6px 8px;
+        }
 
-      #r-font-dec {
-        --i: 2;
-      }
+        #r-font-inc {
+          top: 82px;
+        }
 
-      #r-bold {
-        --i: 3;
-      }
+        #r-font-dec {
+          top: 116px;
+        }
 
-      #r-swipe {
-        display: none;
-      }
+        #r-bold {
+          top: 150px;
+        }
 
-      .reader-title {
-        position: absolute;
-        top: 18px;
-        left: 50%;
-        transform: translateX(-50%);
-        max-width: 60%;
-        text-align: center;
-      }
+        #r-prev,
+        #r-next,
+        #r-type-mobile {
+          order: 2;
+          flex: 1 1 calc(33% - 12px);
+          justify-content: center;
+        }
 
-      .reader-loc {
-        position: absolute;
-        top: 46px;
-        left: 50%;
-        transform: translateX(-50%);
-      }
+        #r-font-inc,
+        #r-font-dec,
+        #r-bold {
+          display: none;
+        }
 
-      #r-prev,
-      #r-next {
-        position: absolute;
-        bottom: 24px;
-        left: 50%;
-        transform: translateX(-50%);
-        min-width: 120px;
-      }
+        .rbtn {
+          font-size: 0.72rem;
+          padding: 6px 10px;
+          min-width: 72px;
+        }
 
-      #r-prev {
-        transform: translate(-140%, 0);
-      }
+        #screen-reader {
+          padding-top: 170px;
+          padding-bottom: calc(105px + env(safe-area-inset-bottom, 0px));
+        }
 
-      #r-next {
-        transform: translate(40%, 0);
-      }
-    }
-
-    /* Mobile layout: controles fijos abajo y viewport ajustado */
-    @media (max-width: 640px) {
-      .reader-bar {
-        position: fixed;
-        bottom: 0;
-        left: 0;
-        right: 0;
-        height: 90px;
-        padding: 12px 16px 16px;
-        gap: 10px;
-        z-index: 5;
-        justify-content: space-between;
-        flex-wrap: wrap;
-        padding-bottom: calc(env(safe-area-inset-bottom, 0px) + 14px);
-        background: linear-gradient(180deg, rgba(20, 18, 14, 0.94), rgba(20, 18, 14, 0.98));
-        align-content: flex-start;
-      }
-
-      .reader-title {
-        position: fixed;
-        top: 12px;
-        left: 50%;
-        transform: translateX(-50%);
-        text-align: center;
-        margin: 0;
-        z-index: 6;
-        max-width: 70%;
-      }
-
-      .reader-loc {
-        position: fixed;
-        top: 34px;
-        left: 50%;
-        transform: translateX(-50%);
-        width: auto;
-        margin: 0;
-        z-index: 6;
-      }
-
-      #r-back {
-        position: fixed;
-        top: 10px;
-        left: 12px;
-        z-index: 6;
-        background: rgba(30, 30, 30, 0.92);
-        color: #f8f8f8;
-        border-color: rgba(0, 0, 0, 0.35);
-      }
-
-      #r-toc {
-        position: fixed;
-        top: 10px;
-        right: 12px;
-        z-index: 6;
-      }
-
-      #r-swipe {
-        position: fixed;
-        top: 46px;
-        right: 12px;
-        z-index: 6;
-        font-size: 0.68rem;
-        padding: 6px 8px;
-      }
-
-      #r-font-inc,
-      #r-font-dec,
-      #r-bold {
-        position: fixed;
-        right: 12px;
-        z-index: 6;
-        font-size: 0.68rem;
-        padding: 6px 8px;
-      }
-
-      #r-font-inc {
-        top: 82px;
-      }
-
-      #r-font-dec {
-        top: 116px;
-      }
-
-      #r-bold {
-        top: 150px;
-      }
-
-      #r-prev,
-      #r-next,
-      #r-type-mobile {
-        order: 2;
-        flex: 1 1 calc(33% - 12px);
-        justify-content: center;
-      }
-
-      #r-font-inc,
-      #r-font-dec,
-      #r-bold {
-        display: none;
-      }
-
-      .rbtn {
-        font-size: 0.72rem;
-        padding: 6px 10px;
-        min-width: 72px;
-      }
-
-      #screen-reader {
-        padding-top: 170px;
-        padding-bottom: calc(105px + env(safe-area-inset-bottom, 0px));
-      }
-
-      #epub-viewport {
-        height: calc(100vh - (170px + 105px + env(safe-area-inset-bottom, 0px)));
-        min-height: 0;
-        padding: 6px 8px 10px;
+        #epub-viewport {
+          height: calc(100vh - (170px + 105px + env(safe-area-inset-bottom, 0px)));
+          min-height: 0;
+          padding: 6px 8px 10px;
+        }
       }
     }
 
