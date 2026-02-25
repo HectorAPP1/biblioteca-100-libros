@@ -1471,6 +1471,8 @@
       <button class="ftab" data-f="narrativa">Narrativa</button>
     </div>
 
+    <div id="recent-strip" class="recent-strip" style="display:none"></div>
+
     <div class="grid-wrap" id="grid-wrap"></div>
   </div>
 
@@ -1996,8 +1998,35 @@
     // ── RENDER ───────────────────────────────────────────────────
     function renderApp() {
       updateStats();
+      renderRecent();
       renderGrid();
       updateDriveStatus();
+    }
+
+    function renderRecent() {
+      const container = document.getElementById('recent-strip');
+      if (!container) return;
+      const inProgress = BOOKS.map(b => {
+        const bs = userBooksCache[b.id] || {};
+        return { b, bs };
+      }).filter(x => (x.bs.reading_progress || 0) > 0 || x.bs.current_cfi).sort((a, b) => (b.bs.reading_progress || 0) - (a.bs.reading_progress || 0)).slice(0, 3);
+      if (!inProgress.length) { container.style.display = 'none'; container.innerHTML = ''; return; }
+      container.style.display = 'block';
+      const cards = inProgress.map(({ b, bs }) => {
+        const cover = bs.cover_data_url;
+        const prog = bs.reading_progress || 0;
+        return `
+          <div class="recent-card">
+            <div class="recent-cover">${cover ? `<img src="${cover}" alt="${b.title}">` : ''}</div>
+            <div class="recent-meta">
+              <div class="recent-title-text">${b.title}</div>
+              <div class="recent-author">${b.author}</div>
+              <div class="recent-progress">${prog}% leído</div>
+              <button class="recent-btn" onclick="openReader(${b.id});event.stopPropagation();">Reanudar</button>
+            </div>
+          </div>`;
+      }).join('');
+      container.innerHTML = `<div class="recent-title">Sigues leyendo</div><div class="recent-row">${cards}</div>`;
     }
 
     function updateStats() {
