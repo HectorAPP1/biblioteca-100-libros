@@ -2674,7 +2674,10 @@
           swipeLayer = document.createElement('div');
           swipeLayer.id = 'swipe-layer';
           swipeLayer.style.position = 'absolute';
-          swipeLayer.style.inset = '0';
+          swipeLayer.style.left = '0';
+          swipeLayer.style.right = '0';
+          swipeLayer.style.top = '40%';
+          swipeLayer.style.bottom = '0';
           swipeLayer.style.zIndex = '4';
           swipeLayer.style.background = 'transparent';
           viewportEl.appendChild(swipeLayer);
