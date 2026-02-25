@@ -902,6 +902,31 @@
       margin-left: auto;
     }
 
+    .type-pop {
+      position: fixed;
+      left: 50%;
+      bottom: 120px;
+      transform: translateX(-50%);
+      background: rgba(20, 18, 14, 0.96);
+      border: 1px solid rgba(255, 255, 255, 0.12);
+      border-radius: 10px;
+      padding: 10px;
+      display: flex;
+      gap: 8px;
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.45);
+      z-index: 20;
+    }
+
+    .type-pop button {
+      background: rgba(255, 255, 255, 0.08);
+      color: white;
+      border: 1px solid rgba(255, 255, 255, 0.15);
+      border-radius: 6px;
+      padding: 8px 10px;
+      font-size: 0.85rem;
+      cursor: pointer;
+    }
+
     /* Page flip micro-effect */
     @keyframes flipLeft {
       from {
@@ -1132,10 +1157,17 @@
       }
 
       #r-prev,
-      #r-next {
+      #r-next,
+      #r-type-mobile {
         order: 2;
-        flex: 1 1 calc(50% - 12px);
+        flex: 1 1 calc(33% - 12px);
         justify-content: center;
+      }
+
+      #r-font-inc,
+      #r-font-dec,
+      #r-bold {
+        display: none;
       }
 
       .rbtn {
@@ -1469,6 +1501,7 @@
       <button class="rbtn" id="r-back" onclick="closeReader()">← Volver</button>
       <span class="reader-title" id="reader-title"></span>
       <button class="rbtn" id="r-prev">‹ Anterior</button>
+      <button class="rbtn" id="r-type-mobile">Aa</button>
       <button class="rbtn" id="r-next">Siguiente ›</button>
       <button class="rbtn" id="r-font-dec">A-</button>
       <button class="rbtn" id="r-font-inc">A+</button>
@@ -2441,9 +2474,13 @@
           epubRendition.themes.select('readerTheme');
           document.getElementById('r-bold').textContent = isBold ? 'Negrita' : 'Normal';
         };
-        document.getElementById('r-font-inc').onclick = () => { fontScale = Math.min(1.6, fontScale + 0.05); applyTypography(); };
-        document.getElementById('r-font-dec').onclick = () => { fontScale = Math.max(0.85, fontScale - 0.05); applyTypography(); };
-        document.getElementById('r-bold').onclick = () => { isBold = !isBold; applyTypography(); };
+        const fontInc = () => { fontScale = Math.min(1.6, fontScale + 0.05); applyTypography(); };
+        const fontDec = () => { fontScale = Math.max(0.85, fontScale - 0.05); applyTypography(); };
+        const toggleBold = () => { isBold = !isBold; applyTypography(); };
+
+        document.getElementById('r-font-inc').onclick = fontInc;
+        document.getElementById('r-font-dec').onclick = fontDec;
+        document.getElementById('r-bold').onclick = toggleBold;
 
         document.getElementById('r-prev').onclick = doPrev;
         document.getElementById('r-next').onclick = doNext;
@@ -2566,6 +2603,26 @@
           applySwipeMode();
           // Bloquear scroll del body cuando se bloquea el vertical
           document.body.style.overflow = allowVerticalScroll ? '' : 'hidden';
+        };
+
+        // Popover tipografía en móvil
+        document.getElementById('r-type-mobile').onclick = (ev) => {
+          const existing = document.getElementById('type-pop');
+          if (existing) { existing.remove(); return; }
+          const pop = document.createElement('div');
+          pop.id = 'type-pop';
+          pop.className = 'type-pop';
+          pop.innerHTML = `
+            <button id="m-font-dec">A-</button>
+            <button id="m-font-inc">A+</button>
+            <button id="m-bold">${isBold ? 'Negrita' : 'Normal'}</button>
+          `;
+          document.body.appendChild(pop);
+          document.getElementById('m-font-inc').onclick = (e) => { e.stopPropagation(); fontInc(); };
+          document.getElementById('m-font-dec').onclick = (e) => { e.stopPropagation(); fontDec(); };
+          document.getElementById('m-bold').onclick = (e) => { e.stopPropagation(); toggleBold(); document.getElementById('m-bold').textContent = isBold ? 'Negrita' : 'Normal'; };
+          const closePop = (e) => { if (!pop.contains(e.target) && e.target.id !== 'r-type-mobile') { pop.remove(); document.removeEventListener('click', closePop); } };
+          setTimeout(() => document.addEventListener('click', closePop), 0);
         };
       } catch (e) {
         document.getElementById('epub-viewport').innerHTML =
