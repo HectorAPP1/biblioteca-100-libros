@@ -940,6 +940,7 @@
       height: calc(100vh - 48px);
       min-height: 500px;
       overflow: hidden;
+      position: relative;
     }
 
     /* Mobile layout: controles fijos abajo y viewport ajustado */
@@ -2354,10 +2355,20 @@
 
         // Gestos de deslizamiento (touch/mouse) para cambiar página
         const viewportEl = document.getElementById('epub-viewport');
+        let swipeLayer = document.getElementById('swipe-layer');
+        if (!swipeLayer) {
+          swipeLayer = document.createElement('div');
+          swipeLayer.id = 'swipe-layer';
+          swipeLayer.style.position = 'absolute';
+          swipeLayer.style.inset = '0';
+          swipeLayer.style.zIndex = '4';
+          swipeLayer.style.background = 'transparent';
+          viewportEl.appendChild(swipeLayer);
+        }
         let startX = null; let startY = null;
         const resetSwipe = () => { startX = null; startY = null; };
-        viewportEl.onpointerdown = (e) => { startX = e.clientX; startY = e.clientY; };
-        viewportEl.onpointerup = (e) => {
+        swipeLayer.onpointerdown = (e) => { startX = e.clientX; startY = e.clientY; };
+        swipeLayer.onpointerup = (e) => {
           if (startX === null || startY === null) return resetSwipe();
           const dx = e.clientX - startX;
           const dy = Math.abs(e.clientY - startY);
@@ -2366,7 +2377,7 @@
           }
           resetSwipe();
         };
-        viewportEl.onpointerleave = resetSwipe;
+        swipeLayer.onpointerleave = resetSwipe;
       } catch (e) {
         document.getElementById('epub-viewport').innerHTML =
           `<div style="color:var(--danger);text-align:center;padding:60px;font-size:0.85rem;">Excepción al inicializar el lector: ${e.message}</div>`;
