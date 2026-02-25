@@ -608,9 +608,8 @@
     }
 
     .modal-head-sub {
-      font-size: 0.72rem;
+      font-size: 0.85rem;
       color: var(--muted2);
-      margin-top: 3px;
     }
 
     .modal-close {
@@ -1472,21 +1471,33 @@
     <div class="modal">
       <div class="modal-head">
         <div>
-          <div class="modal-head-title">Pregunta a Librin</div>
-          <div class="modal-head-sub">Selecciona un fragmento y envíalo a la IA</div>
+          <div class="modal-head-title">Librin</div>
+          <div class="modal-head-sub">Chat sobre lo que estás leyendo. Puedes pegar o seleccionar texto.</div>
         </div>
         <button class="modal-close" onclick="closeLibrinModal()">✕</button>
       </div>
-      <div class="modal-body" style="display:flex;flex-direction:column;gap:10px;">
-        <label style="font-size:0.78rem;color:var(--muted2);">Fragmento seleccionado</label>
-        <textarea id="librin-text" class="librin-textarea"></textarea>
-        <label style="font-size:0.78rem;color:var(--muted2);">Pregunta (opcional)</label>
-        <input type="text" id="librin-question" placeholder="¿Qué significa esto?"
-          style="padding:8px;border-radius:6px;border:1px solid rgba(255,255,255,0.15);background:rgba(255,255,255,0.02);color:var(--paper);">
-        <div id="librin-answer" style="min-height:40px;font-size:0.9rem;color:var(--paper);white-space:pre-wrap;"></div>
-        <div class="librin-actions">
+      <div class="modal-body librin-chat-body">
+        <div class="librin-context">
+          <label>Contexto actual</label>
+          <textarea id="librin-text" class="librin-textarea" placeholder="Texto visible o tu selección"></textarea>
+        </div>
+        <div class="librin-quick">
+          <span>Preguntas rápidas:</span>
+          <div class="librin-quick-row">
+            <button class="librin-chip" data-prompt="Resúmelo en 3 bullets">3 bullets</button>
+            <button class="librin-chip" data-prompt="¿Cuál es la idea clave de este fragmento?">Idea clave</button>
+            <button class="librin-chip" data-prompt="Dame un ejemplo práctico">Ejemplo</button>
+            <button class="librin-chip" data-prompt="Explícalo como si tuviera 12 años">Explicar fácil</button>
+            <button class="librin-chip" data-prompt="¿Cómo aplico esto en la vida real?">Aplicación</button>
+          </div>
+        </div>
+        <div class="librin-chat" id="librin-chat"></div>
+        <div class="librin-input-row">
+          <input type="text" id="librin-question" placeholder="Escribe tu pregunta...">
+          <button class="librin-btn" id="librin-send">Enviar</button>
+        </div>
+        <div class="librin-actions" style="margin-top:6px;">
           <button class="librin-btn secondary" onclick="closeLibrinModal()">Cerrar</button>
-          <button class="librin-btn" id="librin-send">Preguntar</button>
         </div>
       </div>
     </div>
