@@ -1134,14 +1134,14 @@
           bottom: 0;
           left: 0;
           right: 0;
-          height: 90px;
-          padding: 12px 18px 16px;
-          gap: 12px;
+          height: 78px;
+          padding: 10px 14px 12px;
+          gap: 14px;
           z-index: 5;
-          justify-content: space-between;
+          justify-content: center;
           flex-wrap: nowrap;
           padding-bottom: calc(env(safe-area-inset-bottom, 0px) + 14px);
-          background: linear-gradient(180deg, rgba(20, 18, 14, 0.94), rgba(20, 18, 14, 0.98));
+          background: linear-gradient(180deg, rgba(10, 9, 8, 0.96), rgba(10, 9, 8, 0.98));
           align-items: center;
         }
 
@@ -1155,7 +1155,7 @@
 
         #r-back {
           position: fixed;
-          top: 10px;
+          top: 12px;
           left: 12px;
           z-index: 6;
           background: rgba(30, 30, 30, 0.92);
@@ -1165,7 +1165,7 @@
 
         #r-toc {
           position: fixed;
-          top: 10px;
+          top: 12px;
           right: 12px;
           z-index: 6;
         }
@@ -1210,15 +1210,15 @@
         }
 
         #r-prev,
-        #r-next,
-        #r-type-mobile {
+        #r-next {
           display: flex;
-          flex: 1 1 33%;
+          flex: 1 1 48%;
           justify-content: center;
+          min-width: 120px;
         }
 
-        .reader-bar {
-          gap: 12px;
+        #r-type-mobile {
+          display: none;
         }
 
         #r-font-inc,
