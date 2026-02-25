@@ -905,8 +905,8 @@
     /* Page flip micro-effect */
     @keyframes flipLeft {
       from {
-        transform: translateX(-10px) rotateY(-8deg);
-        opacity: 0.9;
+        transform: translateX(-12px) rotateY(-10deg);
+        opacity: 0.92;
       }
 
       to {
@@ -917,8 +917,8 @@
 
     @keyframes flipRight {
       from {
-        transform: translateX(10px) rotateY(8deg);
-        opacity: 0.9;
+        transform: translateX(12px) rotateY(10deg);
+        opacity: 0.92;
       }
 
       to {
@@ -928,11 +928,11 @@
     }
 
     #epub-viewport.flip-left {
-      animation: flipLeft 0.18s ease;
+      animation: flipLeft 0.14s ease-out;
     }
 
     #epub-viewport.flip-right {
-      animation: flipRight 0.18s ease;
+      animation: flipRight 0.14s ease-out;
     }
 
     #epub-viewport {
@@ -2390,7 +2390,7 @@
           if (startX === null || startY === null) return resetSwipe();
           const dx = e.clientX - startX;
           const dy = Math.abs(e.clientY - startY);
-          if (Math.abs(dx) > 60 && dy < 25) {
+          if (Math.abs(dx) > 90 && dy < 20) {
             if (dx > 0) doPrev(); else doNext();
           }
           resetSwipe();
