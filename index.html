@@ -1284,7 +1284,7 @@
     import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js';
     import { getAuth, GoogleAuthProvider, signInWithPopup, signOut as fbSignOut, onAuthStateChanged }
       from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js';
-    import { getFirestore, doc, getDoc, setDoc, updateDoc, collection, getDocs }
+    import { getFirestore, doc, getDoc, setDoc, updateDoc, deleteDoc, collection, getDocs }
       from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js';
 
     // ── CONFIG ──────────────────────────────────────────────────
@@ -1446,6 +1446,39 @@
       }
     };
 
+    // Eliminar libro: borra estado local, Firestore y archivo en Drive (si hay token)
+    window.deleteBook = async (id) => {
+      if (!confirm('¿Eliminar este libro y su ePub de Drive?')) return;
+      const bs = userBooksCache[id] || {};
+
+      // Borrar archivo en Drive
+      if (bs.drive_file_id && driveToken) {
+        try {
+          await fetch(`https://www.googleapis.com/drive/v3/files/${bs.drive_file_id}`, {
+            method: 'DELETE',
+            headers: { Authorization: `Bearer ${driveToken}` }
+          });
+        } catch (e) {
+          console.warn('No se pudo eliminar en Drive:', e);
+        }
+      }
+
+      // Borrar documento en Firestore
+      try {
+        if (currentUser) {
+          await deleteDoc(doc(db, 'users', currentUser.uid, 'books', String(id)));
+        }
+      } catch (e) {
+        console.warn('No se pudo eliminar en Firestore:', e);
+      }
+
+      // Limpiar caché local
+      delete userBooksCache[id];
+      renderApp();
+      closeBookModal();
+      showToast('Libro eliminado', 'success');
+    };
+
     window.signOut = async () => {
       closeUserMenu();
       await fbSignOut(auth);
@@ -1602,7 +1635,7 @@
 
           // URL pública directa de descarga
           const publicUrl = `https://drive.google.com/uc?export=download&id=${uploadData.id}`;
-          await saveBookData(bookId, { drive_file_id: uploadData.id, drive_file_name: metadata.name });
+          await saveBookData(bookId, { drive_file_id: uploadData.id, drive_file_name: metadata.name, drive_public_url: publicUrl });
           showToast('✓ ePub guardado en Drive', 'success');
           return { id: uploadData.id, publicUrl };
         } else {
@@ -1802,6 +1835,7 @@
           ${hasEpub ? `<button class="bact bact-open" style="padding:10px;font-size:0.75rem;" onclick="openReader(${id})">▶ Leer ahora</button>` : ''}
           ${hasEpub ? `<button class="bact" style="padding:10px;font-size:0.75rem;" onclick="downloadEpub(${id})">⬇ Descargar</button>` : ''}
           <button class="bact" style="padding:10px;font-size:0.75rem;" onclick="triggerLocalOpen()">📂 Abrir ePub local</button>
+          <button class="bact danger" style="padding:10px;font-size:0.75rem;" onclick="deleteBook(${id})">🗑 Eliminar</button>
         </div>
       </div>
       <div>
