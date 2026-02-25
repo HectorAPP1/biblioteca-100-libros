@@ -2314,12 +2314,22 @@
         const applyTypography = () => {
           if (!epubRendition || !epubRendition.themes) return;
           const sizePct = Math.round(fontScale * 100);
-          epubRendition.themes.override('body', {
-            'font-size': `${sizePct}%`,
-            'font-weight': isBold ? '600' : '400',
-            'line-height': '1.55',
-            'letter-spacing': '0.01em'
-          });
+          const theme = {
+            'body': {
+              'font-size': `${sizePct}%`,
+              'font-weight': isBold ? '600' : '400',
+              'line-height': '1.55',
+              'letter-spacing': '0.01em'
+            },
+            'p': {
+              'font-size': `${sizePct}%`,
+              'font-weight': isBold ? '600' : '400',
+              'line-height': '1.55',
+              'letter-spacing': '0.01em'
+            }
+          };
+          epubRendition.themes.register('readerTheme', theme);
+          epubRendition.themes.select('readerTheme');
           document.getElementById('r-bold').textContent = isBold ? 'Negrita' : 'Normal';
         };
         document.getElementById('r-font-inc').onclick = () => { fontScale = Math.min(1.6, fontScale + 0.05); applyTypography(); };
