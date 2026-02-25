@@ -1603,13 +1603,25 @@
       const isDirectPath = fileId?.toLowerCase().endsWith('.epub') || /^https?:\/\//.test(fileId || '');
 
       const fetchUrl = isDirectPath
-        ? (fileId.startsWith('http') ? fileId : `./${fileId}`)
+        ? (fileId.startsWith('http') ? fileId : new URL(fileId, window.location.href).href)
         : `https://www.googleapis.com/drive/v3/files/${fileId}?alt=media`;
 
       if (!isDirectPath && !driveToken) { showToast('Conecta Google Drive primero', 'error'); return null; }
       showToast('Descargando desde Drive...');
       try {
         const res = await fetch(fetchUrl, isDirectPath ? {} : { headers: { Authorization: `Bearer ${driveToken}` } });
+
+        // Si es ruta local y falla, reintenta con la ruta literal (sin resolución de URL) por si el servidor sirve desde raíz
+        if (isDirectPath && !res.ok) {
+          const retry = await fetch(fileId);
+          if (retry.ok) {
+            const blob = await retry.blob();
+            const fileUrl = URL.createObjectURL(blob);
+            showToast('✓ Libro cargado', 'success');
+            return fileUrl;
+          }
+        }
+
         if (!res.ok) throw new Error('No se pudo descargar');
         const blob = await res.blob();
         const fileUrl = URL.createObjectURL(blob);
@@ -1875,10 +1887,18 @@
     // ── EPUB READER ──────────────────────────────────────────────
     window.openReader = async (id) => {
       const bs = userBooksCache[id] || {};
-      if (!bs.drive_file_id) { showToast('No hay ePub para este libro', 'error'); return; }
+
+      // Fallback local ePub (archivo incluido en el proyecto) si no hay drive_file_id
+      const localEpub = 'Pensar_rapido_pensar_despacio_Daniel_Kahneman.epub';
+      const fileId = bs.drive_file_id || localEpub;
+      if (!fileId) { showToast('No hay ePub para este libro', 'error'); return; }
       closeBookModal();
 
-      const buf = await getEpubFromDrive(bs.drive_file_id);
+      let buf = await getEpubFromDrive(fileId);
+      // Si falla Drive, probar el ePub local incluido
+      if (!buf && fileId !== localEpub) {
+        buf = await getEpubFromDrive(localEpub);
+      }
       if (!buf) return;
 
       const b = BOOKS.find(x => x.id === id);
