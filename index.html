@@ -840,6 +840,12 @@
       cursor: pointer;
     }
 
+    .progress-slider[disabled] {
+      cursor: default;
+      opacity: 1;
+      pointer-events: none;
+    }
+
     /* ─── READER ─── */
     #screen-reader {
       flex-direction: column;
@@ -906,13 +912,14 @@
         bottom: 0;
         left: 0;
         right: 0;
-        height: 74px;
-        padding: 10px 12px 14px;
+        height: 90px;
+        padding: 12px 16px 18px;
         gap: 10px;
         z-index: 5;
         justify-content: space-between;
         flex-wrap: wrap;
-        padding-bottom: max(14px, env(safe-area-inset-bottom, 14px));
+        padding-bottom: max(18px, env(safe-area-inset-bottom, 18px));
+        background: linear-gradient(180deg, rgba(20, 18, 14, 0.94), rgba(20, 18, 14, 0.98));
       }
 
       .reader-title {
@@ -925,15 +932,17 @@
       .rbtn {
         font-size: 0.72rem;
         padding: 6px 10px;
+        min-width: 72px;
       }
 
       #screen-reader {
-        padding-bottom: 80px;
+        padding-bottom: 95px;
       }
 
       #epub-viewport {
-        height: calc(100vh - 80px);
+        height: calc(100vh - 95px);
         min-height: 0;
+        padding: 6px 8px 10px;
       }
     }
 
@@ -1891,9 +1900,7 @@
 
         <div class="progress-row">
           <label>Progreso de lectura: <strong id="prog-val">${progressVal}%</strong></label>
-          <input type="range" class="progress-slider" min="0" max="100" value="${progressVal}"
-            oninput="document.getElementById('prog-val').textContent=this.value+'%'"
-            onchange="saveProgress(${id},this.value)">
+          <input type="range" class="progress-slider" min="0" max="100" value="${progressVal}" disabled>
         </div>
 
         <div style="margin-top:16px;">
@@ -2154,6 +2161,18 @@
           menu.style.boxShadow = '0 6px 24px rgba(0,0,0,0.35)';
           menu.style.zIndex = '10';
 
+          const closeBtn = document.createElement('button');
+          closeBtn.textContent = '✕';
+          closeBtn.style.background = 'rgba(255,255,255,0.12)';
+          closeBtn.style.color = 'white';
+          closeBtn.style.border = '1px solid rgba(255,255,255,0.2)';
+          closeBtn.style.borderRadius = '50%';
+          closeBtn.style.width = '28px';
+          closeBtn.style.height = '28px';
+          closeBtn.style.cursor = 'pointer';
+          closeBtn.style.float = 'right';
+          closeBtn.onclick = () => document.getElementById('toc-menu')?.remove();
+
           const list = document.createElement('div');
           list.style.display = 'flex';
           list.style.flexDirection = 'column';
@@ -2176,6 +2195,7 @@
             list.appendChild(btn);
           });
 
+          menu.appendChild(closeBtn);
           menu.appendChild(list);
           document.body.appendChild(menu);
           // Cerrar al hacer clic afuera
