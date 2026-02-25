@@ -4,30 +4,49 @@ export default async function handler(req, res) {
   const apiKey = process.env.GROQ_API_KEY;
   if (!apiKey) return res.status(500).json({ error: "Missing GROQ_API_KEY" });
 
+  // Modelo principal y fallback por deprecaciones
+  const modelCandidates = [
+    process.env.GROQ_MODEL,
+    "llama-3.2-11b-text", // modelo v4 liviano
+    "llama-3.2-90b-text", // modelo v4 grande
+  ].filter(Boolean);
+
   const prompt = `Fragmento:\n${text}\n\nPregunta del lector: ${question || "Explica en detalle"}\n\nExplica claro, breve y ademas entrega una mirada crítica al fragmento.`;
-  const resp = await fetch("https://api.groq.com/openai/v1/chat/completions", {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-      Authorization: `Bearer ${apiKey}`,
-    },
-    body: JSON.stringify({
-      model: "llama-3.2-70b-versatile",
-      messages: [
-        {
-          role: "system",
-          content:
-            "Eres Librin, ayudas a entender textos de libros de forma clara y concisa, ademas debes ser un experto en la materia.",
+  let lastError = null;
+  for (const model of modelCandidates) {
+    const resp = await fetch(
+      "https://api.groq.com/openai/v1/chat/completions",
+      {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${apiKey}`,
         },
-        { role: "user", content: prompt },
-      ],
-      max_tokens: 400,
-    }),
-  });
-  if (!resp.ok) {
-    const err = await resp.text();
-    return res.status(resp.status).json({ error: "Groq error", detail: err });
+        body: JSON.stringify({
+          model,
+          messages: [
+            {
+              role: "system",
+              content:
+                "Eres Librin, ayudas a entender textos de libros de forma clara y concisa, ademas debes ser un experto en la materia.",
+            },
+            { role: "user", content: prompt },
+          ],
+          max_tokens: 400,
+        }),
+      },
+    );
+    if (!resp.ok) {
+      lastError = await resp.text();
+      continue;
+    }
+    const data = await resp.json();
+    return res
+      .status(200)
+      .json({ answer: data.choices?.[0]?.message?.content || "", model });
   }
-  const data = await resp.json();
-  res.status(200).json({ answer: data.choices?.[0]?.message?.content || "" });
+
+  return res
+    .status(500)
+    .json({ error: "Groq error", detail: lastError || "model_not_found" });
 }
