@@ -99,6 +99,7 @@
     if (!rendition) return;
     allowFab = true;
     clearSelectionUI();
+    if (fab) fab.style.display = "block";
 
     rendition.on("rendered", (_section, contents) => {
       try {
