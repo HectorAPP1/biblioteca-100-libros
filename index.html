@@ -906,12 +906,13 @@
         bottom: 0;
         left: 0;
         right: 0;
-        height: 62px;
-        padding: 8px 12px;
-        gap: 8px;
+        height: 74px;
+        padding: 10px 12px 14px;
+        gap: 10px;
         z-index: 5;
         justify-content: space-between;
         flex-wrap: wrap;
+        padding-bottom: max(14px, env(safe-area-inset-bottom, 14px));
       }
 
       .reader-title {
@@ -927,11 +928,11 @@
       }
 
       #screen-reader {
-        padding-bottom: 62px;
+        padding-bottom: 80px;
       }
 
       #epub-viewport {
-        height: calc(100vh - 62px);
+        height: calc(100vh - 80px);
         min-height: 0;
       }
     }
@@ -2108,8 +2109,26 @@
           viewport.appendChild(errDiv);
         });
 
+        let locationsReady = false;
+        const updatePctForCfi = async (locCfi) => {
+          if (!locationsReady || !locCfi) return null;
+          const pageFromLocation = epubBook.locations.percentageFromCfi(locCfi);
+          if (typeof pageFromLocation === 'number' && !Number.isNaN(pageFromLocation)) {
+            const pct = Math.round(pageFromLocation * 100);
+            document.getElementById('reader-loc').textContent = `${pct}% del libro`;
+            if (currentBookId) {
+              await saveBookData(currentBookId, { current_cfi: locCfi, reading_progress: pct });
+            }
+            return pct;
+          }
+          return null;
+        };
+
         // Generate locations in the background for progress calculation
-        epubBook.ready.then(() => epubBook.locations.generate(1600)).catch(e => console.error("Location generation err:", e));
+        epubBook.ready.then(() => epubBook.locations.generate(1600)).then(async () => {
+          locationsReady = true;
+          if (cfi) { await updatePctForCfi(cfi); }
+        }).catch(e => console.error("Location generation err:", e));
 
         document.getElementById('r-prev').onclick = () => epubRendition.prev();
         document.getElementById('r-next').onclick = () => epubRendition.next();
@@ -2117,18 +2136,12 @@
         epubRendition.on('relocated', async loc => {
           const locCfi = loc?.start?.cfi;
           if (locCfi) {
-            const pageFromLocation = epubBook.locations.percentageFromCfi(locCfi);
-            let pct = null;
-            if (typeof pageFromLocation === 'number' && !Number.isNaN(pageFromLocation)) {
-              pct = Math.round(pageFromLocation * 100);
-              document.getElementById('reader-loc').textContent = `${pct}% del libro`;
-            } else {
+            const pct = await updatePctForCfi(locCfi);
+            if (pct === null) {
               document.getElementById('reader-loc').textContent = `Leído (${loc?.start?.displayed?.page || 1}/${loc?.start?.displayed?.total || '?'})`;
-            }
-            if (currentBookId) {
-              const payload = { current_cfi: locCfi };
-              if (pct !== null) payload.reading_progress = pct;
-              await saveBookData(currentBookId, payload);
+              if (currentBookId) {
+                await saveBookData(currentBookId, { current_cfi: locCfi });
+              }
             }
           }
         });
