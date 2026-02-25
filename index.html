@@ -1551,32 +1551,47 @@
       const folderId = await ensureDriveFolder();
       showToast('Subiendo a Drive...');
 
-      const metadata = {
-        name: `${bookTitle}.epub`,
-        mimeType: 'application/epub+zip',
-        parents: folderId ? [folderId] : []
-      };
-      const form = new FormData();
-      form.append('metadata', new Blob([JSON.stringify(metadata)], { type: 'application/json' }));
-      form.append('file', file);
-
       try {
-        const res = await fetch('https://www.googleapis.com/upload/drive/v3/files?uploadType=multipart&fields=id,name', {
+        // Step 1: Create the empty file with metadata
+        const metadata = {
+          name: `${bookTitle}.epub`,
+          mimeType: 'application/epub+zip',
+          parents: folderId ? [folderId] : []
+        };
+
+        const resMeta = await fetch('https://www.googleapis.com/drive/v3/files', {
           method: 'POST',
-          headers: { Authorization: `Bearer ${driveToken}` },
-          body: form
+          headers: {
+            'Authorization': `Bearer ${driveToken}`,
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify(metadata)
         });
-        const data = await res.json();
-        if (data.id) {
-          await saveBookData(bookId, { drive_file_id: data.id, drive_file_name: data.name });
+        const meta = await resMeta.json();
+
+        if (!meta.id) throw new Error('No se pudo crear el archivo');
+
+        // Step 2: Upload the actual file content to the created file ID
+        const resUpload = await fetch(`https://www.googleapis.com/upload/drive/v3/files/${meta.id}?uploadType=media`, {
+          method: 'PATCH',
+          headers: {
+            'Authorization': `Bearer ${driveToken}`,
+            'Content-Type': 'application/epub+zip'
+          },
+          body: file
+        });
+        const uploadData = await resUpload.json();
+
+        if (uploadData.id) {
+          await saveBookData(bookId, { drive_file_id: uploadData.id, drive_file_name: metadata.name });
           showToast('✓ ePub guardado en Drive', 'success');
-          return data.id;
+          return uploadData.id;
         } else {
-          showToast('Error al subir a Drive', 'error');
-          return null;
+          throw new Error('Fallo al subir contenido');
         }
       } catch (e) {
         showToast('Error de conexión con Drive', 'error');
+        console.error("Upload Error: ", e);
         return null;
       }
     }
@@ -1589,22 +1604,9 @@
           headers: { Authorization: `Bearer ${driveToken}` }
         });
         if (!res.ok) throw new Error('No se pudo descargar');
-        const blob = await res.blob();
-
-        // Convert Blob to Base64 String
-        const base64Str = await new Promise((resolve, reject) => {
-          const reader = new FileReader();
-          reader.onloadend = () => {
-            // reader.result contains "data:*/*;base64,....", we only want the pure base64
-            const b64 = reader.result.split(',')[1];
-            resolve(b64);
-          };
-          reader.onerror = reject;
-          reader.readAsDataURL(blob);
-        });
-
+        const buf = await res.arrayBuffer();
         showToast('✓ Libro cargado', 'success');
-        return base64Str;
+        return buf;
       } catch (e) {
         showToast('Error al descargar desde Drive', 'error');
         return null;
