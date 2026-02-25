@@ -1589,9 +1589,22 @@
           headers: { Authorization: `Bearer ${driveToken}` }
         });
         if (!res.ok) throw new Error('No se pudo descargar');
-        const buf = await res.arrayBuffer();
+        const blob = await res.blob();
+
+        // Convert Blob to Base64 String
+        const base64Str = await new Promise((resolve, reject) => {
+          const reader = new FileReader();
+          reader.onloadend = () => {
+            // reader.result contains "data:*/*;base64,....", we only want the pure base64
+            const b64 = reader.result.split(',')[1];
+            resolve(b64);
+          };
+          reader.onerror = reject;
+          reader.readAsDataURL(blob);
+        });
+
         showToast('✓ Libro cargado', 'success');
-        return buf;
+        return base64Str;
       } catch (e) {
         showToast('Error al descargar desde Drive', 'error');
         return null;
@@ -1873,18 +1886,14 @@
       try {
         if (epubRendition) { try { epubRendition.destroy(); } catch (e) { } }
 
-        if (buf.byteLength < 500) {
-          let msg = 'El archivo descargado es demasiado pequeño, puede que no sea un ePub válido o esté corrupto.';
-          try {
-            const textContent = new TextDecoder().decode(buf);
-            if (textContent.includes('error')) msg = `Error desde Google Drive: ${textContent}`;
-          } catch (e) { }
+        if (!buf || buf.length < 500) {
+          let msg = 'El archivo descargado es demasiado pequeño o no pudo ser convertido, puede que no sea un ePub válido o esté corrupto.';
           document.getElementById('epub-viewport').innerHTML = `<div style="color:var(--danger);text-align:center;padding:60px;">${msg}</div>`;
           return;
         }
 
         epubBook = window.ePub();
-        await epubBook.open(buf);
+        await epubBook.open(buf, "base64");
 
         try {
           await epubBook.ready;
