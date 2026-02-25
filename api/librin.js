@@ -7,8 +7,10 @@ export default async function handler(req, res) {
   // Modelo principal y fallback por deprecaciones
   const modelCandidates = [
     process.env.GROQ_MODEL,
-    "llama-3.2-11b-text", // modelo v4 liviano
-    "llama-3.2-90b-text", // modelo v4 grande
+    "llama-3.3-70b-versatile", // recomendación actual
+    "llama-3.3-8b-instruct", // opción liviana actual
+    "llama-3.2-90b-text", // fallback v4 grande
+    "llama-3.2-11b-text", // fallback v4 liviano
   ].filter(Boolean);
 
   const prompt = `Fragmento:\n${text}\n\nPregunta del lector: ${question || "Explica en detalle"}\n\nExplica claro, breve y ademas entrega una mirada crítica al fragmento.`;
