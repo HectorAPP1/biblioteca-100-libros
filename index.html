@@ -1777,7 +1777,7 @@
     <div class="bcard ${isRead ? 'is-read' : ''} ${hasEpub ? 'has-epub' : ''}"
          style="animation-delay:${idx * 0.03}s"
          onclick="openBookModal(${b.id})">
-      <div class="bcard-spine" style="">
+      <div class="bcard-spine">
         <div class="spine-bg" style="background:linear-gradient(145deg,${c1},${c2})"></div>
         <span class="spine-num">#${b.n}</span>
         <div class="spine-badge ${isRead ? 'badge-read' : hasEpub ? 'badge-epub' : 'badge-none'}">
@@ -1789,10 +1789,9 @@
         <div class="bcard-title">${b.title}</div>
         <div class="bcard-author">${b.author}</div>
         <div class="bcard-actions" onclick="event.stopPropagation()">
-          <button class="bact bact-read ${isRead ? 'on' : ''}" onclick="toggleRead(${b.id})">${isRead ? '✓ Leído' : 'Leer'}</button>
+          <button class="bact bact-read ${isRead ? 'on' : ''}" onclick="toggleRead(${b.id})">${isRead ? '✓ leído' : 'Marcar leído'}</button>
           <button class="bact bact-epub ${hasEpub ? 'on' : ''}" onclick="triggerEpubUpload(${b.id})">${hasEpub ? '📄' : '↑ ePub'}</button>
           ${hasEpub ? `<button class="bact bact-open" onclick="openReader(${b.id})">▶</button>` : ''}
-          ${hasEpub ? `<button class="bact" style="min-width:42px" onclick="downloadEpub(${b.id});event.stopPropagation();">⬇</button>` : ''}
         </div>
       </div>
     </div>`;
@@ -1834,7 +1833,6 @@
           </button>
           ${hasEpub ? `<button class="bact bact-open" style="padding:10px;font-size:0.75rem;" onclick="openReader(${id})">▶ Leer ahora</button>` : ''}
           ${hasEpub ? `<button class="bact" style="padding:10px;font-size:0.75rem;" onclick="downloadEpub(${id})">⬇ Descargar</button>` : ''}
-          <button class="bact" style="padding:10px;font-size:0.75rem;" onclick="triggerLocalOpen()">📂 Abrir ePub local</button>
           <button class="bact danger" style="padding:10px;font-size:0.75rem;" onclick="deleteBook(${id})">🗑 Eliminar</button>
         </div>
       </div>
@@ -1893,7 +1891,7 @@
       await saveBookData(id, { is_read: newVal, read_at: newVal ? new Date().toISOString() : null });
       renderApp();
       // Update modal button if open
-      const btn = document.querySelector(`[onclick="toggleRead(${id})"]`);
+      const btn = document.querySelector(`[onclick = "toggleRead(${id})"]`);
       if (btn) btn.textContent = newVal ? '✓ leído' : 'Marcar leído';
       showToast(newVal ? '✓ leído' : 'Desmarcado', 'success');
     };
@@ -1947,7 +1945,7 @@
 
     window.handleDrop = async (e, id) => {
       e.preventDefault();
-      document.getElementById(`upload-zone-${id}`)?.classList.remove('drag');
+      document.getElementById(`upload - zone - ${id} `)?.classList.remove('drag');
       const file = e.dataTransfer.files[0];
       if (!file || !file.name.endsWith('.epub')) { showToast('Solo archivos .epub', 'error'); return; }
       currentBookId = id;
@@ -2074,14 +2072,17 @@
           const locCfi = loc?.start?.cfi;
           if (locCfi) {
             const pageFromLocation = epubBook.locations.percentageFromCfi(locCfi);
+            let pct = null;
             if (typeof pageFromLocation === 'number' && !Number.isNaN(pageFromLocation)) {
-              const pct = Math.round(pageFromLocation * 100);
+              pct = Math.round(pageFromLocation * 100);
               document.getElementById('reader-loc').textContent = `${pct}% del libro`;
             } else {
               document.getElementById('reader-loc').textContent = `Leído (${loc?.start?.displayed?.page || 1}/${loc?.start?.displayed?.total || '?'})`;
             }
             if (currentBookId) {
-              await saveBookData(currentBookId, { current_cfi: locCfi });
+              const payload = { current_cfi: locCfi };
+              if (pct !== null) payload.reading_progress = pct;
+              await saveBookData(currentBookId, payload);
             }
           }
         });
