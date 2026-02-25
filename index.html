@@ -893,7 +893,9 @@
     }
 
     #epub-viewport {
-      flex: 1;
+      width: 100%;
+      height: calc(100vh - 48px);
+      min-height: 500px;
       overflow: hidden;
     }
 
@@ -1604,9 +1606,10 @@
           headers: { Authorization: `Bearer ${driveToken}` }
         });
         if (!res.ok) throw new Error('No se pudo descargar');
-        const buf = await res.arrayBuffer();
+        const blob = await res.blob();
+        const fileUrl = URL.createObjectURL(blob);
         showToast('✓ Libro cargado', 'success');
-        return buf;
+        return fileUrl;
       } catch (e) {
         showToast('Error al descargar desde Drive', 'error');
         return null;
@@ -1895,7 +1898,7 @@
         }
 
         epubBook = window.ePub();
-        await epubBook.open(buf, "base64");
+        await epubBook.open(buf);
 
         try {
           await epubBook.ready;
