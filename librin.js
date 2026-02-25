@@ -10,7 +10,12 @@
     return;
 
   let selectionText = "";
-  let allowFab = false;
+  let allowFab = true;
+  let currentContext = {
+    bookTitle: "",
+    pageLabel: "",
+    visibleText: "",
+  };
 
   function closeModal() {
     modalBg.classList.remove("open");
@@ -18,7 +23,6 @@
   }
 
   function openModal() {
-    if (!selectionText) return;
     textArea.value = selectionText;
     questionInput.value = "";
     answerBox.textContent = "";
@@ -42,15 +46,20 @@
   });
 
   sendBtn.onclick = async () => {
-    const text = textArea.value.trim();
-    const question = questionInput.value.trim();
+    const text = (textArea.value || "").trim();
+    const question = (questionInput.value || "").trim();
     if (!text) return;
     answerBox.textContent = "Consultando a Librin...";
     try {
+      const payload = {
+        text,
+        question,
+        context: currentContext,
+      };
       const resp = await fetch("/api/librin", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ text, question }),
+        body: JSON.stringify(payload),
       });
       let data;
       try {
@@ -77,7 +86,6 @@
       const txt = win.getSelection()?.toString()?.trim();
       if (txt) {
         selectionText = txt;
-        fab.style.display = "block";
       }
     });
   }
@@ -93,7 +101,17 @@
     clearSelectionUI();
 
     rendition.on("rendered", (_section, contents) => {
+      try {
+        const visible = contents?.document?.body?.innerText || "";
+        currentContext.visibleText = visible.slice(0, 4000);
+      } catch (e) {}
       attachSelectionListeners(contents);
+    });
+
+    rendition.on("relocated", (loc) => {
+      currentContext.pageLabel = loc?.start?.displayed?.page
+        ? `Página ${loc.start.displayed.page}/${loc.start.displayed.total || "?"}`
+        : "";
     });
 
     rendition.on("selected", (cfi, contents) => {
@@ -101,12 +119,15 @@
       const txt = range?.toString()?.trim();
       if (txt) {
         selectionText = txt;
-        fab.style.display = "block";
-        openModal();
       }
     });
   };
 
   // Hide FAB when leaving reader
   window.hideLibrinFab = () => clearSelectionUI();
+
+  // Mantener el FAB visible para abrir chat manualmente
+  if (fab) {
+    fab.style.display = "block";
+  }
 })();
