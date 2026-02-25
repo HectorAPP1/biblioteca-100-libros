@@ -12,7 +12,7 @@ export default async function handler(req, res) {
       Authorization: `Bearer ${apiKey}`,
     },
     body: JSON.stringify({
-      model: "mixtral-8x7b-32768", // o tu modelo preferido
+      model: "llama-3.2-70b-versatile",
       messages: [
         {
           role: "system",
