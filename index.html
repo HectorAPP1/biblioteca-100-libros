@@ -22,7 +22,7 @@
   <meta name="description" content="Librin — Tu biblioteca personal de 100 libros esenciales">
 
   <link
-    href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;0,900;1,400&family=DM+Sans:opsz,wght@9..40,300;9..40,400;9..40,500&display=swap"
+    href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,500;0,600;0,700;0,900;1,400&family=DM+Sans:opsz,wght@9..40,300;9..40,400;9..40,500&family=Lora:ital,wght@0,400;0,500;0,600;0,700;1,400&family=Merriweather:ital,wght@0,300;0,400;0,700;0,900;1,300;1,400&family=EB+Garamond:ital,wght@0,400;0,500;0,600;0,700;0,800;1,400&family=Crimson+Pro:ital,wght@0,300;0,400;0,600;0,700;1,300;1,400&display=swap"
     rel="stylesheet">
   <style>
     :root {
@@ -1395,62 +1395,520 @@
       margin-left: auto;
     }
 
+    /* ── TYPOGRAPHY & TTS PANEL ─────────────────────────────────── */
     .type-pop {
       position: fixed;
       left: 50%;
-      bottom: 80px;
+      bottom: 90px;
       transform: translateX(-50%);
-      background: rgba(20, 18, 14, 0.96);
-      border: 1px solid rgba(255, 255, 255, 0.12);
-      border-radius: 10px;
-      padding: 10px;
-      display: flex;
-      gap: 8px;
-      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.45);
-      z-index: 20;
+      background: rgba(18, 16, 12, 0.97);
+      border: 1px solid rgba(201, 168, 76, 0.2);
+      border-radius: 16px;
+      padding: 0;
+      width: 320px;
+      box-shadow: 0 20px 60px rgba(0, 0, 0, 0.6), 0 0 0 1px rgba(255, 255, 255, 0.04);
+      z-index: 500;
+      overflow: hidden;
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+      animation: typePanelIn 0.22s cubic-bezier(0.34, 1.56, 0.64, 1) both;
     }
 
-    .type-pop button {
+    @keyframes typePanelIn {
+      from {
+        opacity: 0;
+        transform: translateX(-50%) translateY(16px) scale(0.94);
+      }
+
+      to {
+        opacity: 1;
+        transform: translateX(-50%) translateY(0) scale(1);
+      }
+    }
+
+    .type-pop-header {
+      padding: 12px 16px 10px;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.07);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .type-pop-title {
+      font-size: 0.68rem;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: var(--muted2);
+      font-family: 'DM Sans', sans-serif;
+    }
+
+    .type-pop-close {
+      width: 22px;
+      height: 22px;
+      border-radius: 50%;
       background: rgba(255, 255, 255, 0.08);
+      border: none;
+      cursor: pointer;
+      color: var(--muted2);
+      font-size: 0.7rem;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: background 0.15s;
+    }
+
+    .type-pop-close:hover {
+      background: rgba(255, 255, 255, 0.15);
       color: white;
-      border: 1px solid rgba(255, 255, 255, 0.15);
-      border-radius: 6px;
-      padding: 8px 10px;
-      font-size: 0.85rem;
+    }
+
+    .type-pop-section {
+      padding: 10px 16px;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+    }
+
+    .type-pop-section:last-child {
+      border-bottom: none;
+    }
+
+    .type-pop-label {
+      font-size: 0.6rem;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: var(--muted);
+      display: block;
+      margin-bottom: 8px;
+      font-family: 'DM Sans', sans-serif;
+    }
+
+    /* Tamaño */
+    .font-size-row {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .font-size-btn {
+      width: 32px;
+      height: 32px;
+      border-radius: 8px;
+      background: rgba(255, 255, 255, 0.07);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      color: var(--paper);
+      cursor: pointer;
+      font-weight: 600;
+      font-family: 'DM Sans', sans-serif;
+      transition: background 0.15s;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+    }
+
+    .font-size-btn:hover {
+      background: rgba(255, 255, 255, 0.14);
+    }
+
+    .font-size-btn:active {
+      background: rgba(201, 168, 76, 0.2);
+    }
+
+    .font-size-a-small {
+      font-size: 0.8rem;
+    }
+
+    .font-size-a-big {
+      font-size: 1.1rem;
+    }
+
+    .font-size-slider {
+      flex: 1;
+      -webkit-appearance: none;
+      appearance: none;
+      height: 3px;
+      border-radius: 2px;
+      background: rgba(255, 255, 255, 0.1);
+      outline: none;
       cursor: pointer;
     }
 
-    /* Page flip micro-effect */
-    @keyframes flipLeft {
-      from {
-        transform: translateX(-12px) rotateY(-10deg);
-        opacity: 0.92;
+    .font-size-slider::-webkit-slider-thumb {
+      -webkit-appearance: none;
+      width: 18px;
+      height: 18px;
+      border-radius: 50%;
+      background: var(--gold);
+      box-shadow: 0 2px 8px rgba(201, 168, 76, 0.5);
+      cursor: pointer;
+      transition: transform 0.1s;
+    }
+
+    .font-size-slider::-webkit-slider-thumb:active {
+      transform: scale(1.2);
+    }
+
+    .font-size-label {
+      font-size: 0.68rem;
+      color: var(--muted2);
+      min-width: 30px;
+      text-align: right;
+      font-family: 'DM Sans', sans-serif;
+    }
+
+    /* Peso */
+    .weight-grid {
+      display: grid;
+      grid-template-columns: repeat(5, 1fr);
+      gap: 5px;
+    }
+
+    .weight-btn {
+      padding: 6px 4px;
+      border-radius: 7px;
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid rgba(255, 255, 255, 0.09);
+      color: var(--muted2);
+      cursor: pointer;
+      font-size: 0.62rem;
+      font-family: 'DM Sans', sans-serif;
+      text-align: center;
+      transition: all 0.15s;
+      line-height: 1.2;
+    }
+
+    .weight-btn:hover {
+      background: rgba(255, 255, 255, 0.1);
+      color: var(--paper);
+    }
+
+    .weight-btn.active {
+      background: rgba(201, 168, 76, 0.2);
+      border-color: rgba(201, 168, 76, 0.45);
+      color: var(--gold);
+    }
+
+    .weight-btn span {
+      display: block;
+      font-size: 0.9rem;
+      margin-bottom: 1px;
+    }
+
+    /* Fuente */
+    .font-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 5px;
+    }
+
+    .font-btn {
+      padding: 9px 10px;
+      border-radius: 8px;
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid rgba(255, 255, 255, 0.09);
+      color: var(--muted2);
+      cursor: pointer;
+      text-align: left;
+      transition: all 0.15s;
+    }
+
+    .font-btn:hover {
+      background: rgba(255, 255, 255, 0.1);
+      color: var(--paper);
+    }
+
+    .font-btn.active {
+      background: rgba(201, 168, 76, 0.15);
+      border-color: rgba(201, 168, 76, 0.4);
+      color: var(--gold);
+    }
+
+    .font-btn-name {
+      font-size: 0.95rem;
+      display: block;
+      line-height: 1.1;
+      margin-bottom: 2px;
+    }
+
+    .font-btn-sample {
+      font-size: 0.6rem;
+      color: var(--muted);
+      font-style: italic;
+      font-family: 'DM Sans', sans-serif;
+    }
+
+    .font-btn.active .font-btn-sample {
+      color: rgba(201, 168, 76, 0.6);
+    }
+
+    /* ── LECTURA GUIADA POR LIBRIN (TTS) ─────────────────────────── */
+    .tts-section {
+      padding: 12px 16px 14px;
+      background: linear-gradient(135deg, rgba(201, 168, 76, 0.07), rgba(201, 168, 76, 0.02));
+    }
+
+    .tts-label-row {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin-bottom: 10px;
+    }
+
+    .tts-icon {
+      width: 26px;
+      height: 26px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, var(--gold), var(--gold2));
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 0.75rem;
+      flex-shrink: 0;
+      box-shadow: 0 2px 8px rgba(201, 168, 76, 0.35);
+    }
+
+    .tts-label-text {
+      flex: 1;
+    }
+
+    .tts-label-title {
+      font-size: 0.72rem;
+      font-weight: 600;
+      color: var(--paper);
+      font-family: 'DM Sans', sans-serif;
+      display: block;
+      line-height: 1.2;
+    }
+
+    .tts-label-sub {
+      font-size: 0.58rem;
+      color: var(--muted2);
+      font-family: 'DM Sans', sans-serif;
+    }
+
+    /* Botón principal TTS */
+    .tts-btn-main {
+      width: 100%;
+      padding: 10px 14px;
+      border-radius: 10px;
+      border: none;
+      cursor: pointer;
+      font-family: 'DM Sans', sans-serif;
+      font-size: 0.78rem;
+      font-weight: 600;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      transition: all 0.2s;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .tts-btn-main.tts-idle {
+      background: linear-gradient(135deg, rgba(201, 168, 76, 0.18), rgba(201, 168, 76, 0.08));
+      border: 1px solid rgba(201, 168, 76, 0.35);
+      color: var(--gold);
+    }
+
+    .tts-btn-main.tts-idle:hover {
+      background: linear-gradient(135deg, rgba(201, 168, 76, 0.28), rgba(201, 168, 76, 0.14));
+      box-shadow: 0 4px 16px rgba(201, 168, 76, 0.2);
+    }
+
+    .tts-btn-main.tts-playing {
+      background: linear-gradient(135deg, rgba(201, 168, 76, 0.25), rgba(201, 168, 76, 0.12));
+      border: 1px solid rgba(201, 168, 76, 0.5);
+      color: var(--gold);
+    }
+
+    .tts-btn-main.tts-loading {
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      color: var(--muted2);
+      pointer-events: none;
+    }
+
+    /* Ondas sonoras animadas */
+    .tts-waves {
+      display: flex;
+      align-items: center;
+      gap: 2px;
+      height: 16px;
+    }
+
+    .tts-wave {
+      width: 3px;
+      border-radius: 2px;
+      background: var(--gold);
+      animation: ttsWave 0.9s ease-in-out infinite;
+    }
+
+    .tts-wave:nth-child(1) {
+      height: 5px;
+      animation-delay: 0s;
+    }
+
+    .tts-wave:nth-child(2) {
+      height: 12px;
+      animation-delay: 0.15s;
+    }
+
+    .tts-wave:nth-child(3) {
+      height: 8px;
+      animation-delay: 0.3s;
+    }
+
+    .tts-wave:nth-child(4) {
+      height: 14px;
+      animation-delay: 0.1s;
+    }
+
+    .tts-wave:nth-child(5) {
+      height: 6px;
+      animation-delay: 0.25s;
+    }
+
+    @keyframes ttsWave {
+
+      0%,
+      100% {
+        transform: scaleY(0.4);
+        opacity: 0.5;
       }
 
-      to {
-        transform: translateX(0) rotateY(0);
+      50% {
+        transform: scaleY(1);
         opacity: 1;
       }
     }
 
-    @keyframes flipRight {
-      from {
-        transform: translateX(12px) rotateY(10deg);
-        opacity: 0.92;
+    /* Controles velocidad */
+    .tts-controls {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      margin-top: 8px;
+    }
+
+    .tts-speed-label {
+      font-size: 0.6rem;
+      color: var(--muted);
+      font-family: 'DM Sans', sans-serif;
+      white-space: nowrap;
+    }
+
+    .tts-speed-btn {
+      padding: 3px 8px;
+      border-radius: 5px;
+      font-size: 0.62rem;
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      color: var(--muted2);
+      cursor: pointer;
+      font-family: 'DM Sans', sans-serif;
+      transition: all 0.15s;
+    }
+
+    .tts-speed-btn:hover {
+      background: rgba(255, 255, 255, 0.1);
+      color: var(--paper);
+    }
+
+    .tts-speed-btn.active {
+      background: rgba(201, 168, 76, 0.15);
+      border-color: rgba(201, 168, 76, 0.4);
+      color: var(--gold);
+    }
+
+    .tts-voice-sel {
+      margin-left: auto;
+      font-size: 0.62rem;
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      color: var(--muted2);
+      border-radius: 5px;
+      padding: 3px 6px;
+      font-family: 'DM Sans', sans-serif;
+      cursor: pointer;
+      max-width: 110px;
+    }
+
+    .tts-voice-sel:focus {
+      outline: none;
+      border-color: rgba(201, 168, 76, 0.4);
+    }
+
+    /* ── PAGE CURL — estilo Apple Books ──────────────────────────── */
+    @keyframes pageCurlNext {
+      0% {
+        transform: perspective(1800px) rotateY(0deg) translateX(0);
+        opacity: 1;
       }
 
-      to {
-        transform: translateX(0) rotateY(0);
+      28% {
+        transform: perspective(1800px) rotateY(-7deg) translateX(-3%);
+        opacity: 0.88;
+      }
+
+      58% {
+        transform: perspective(1800px) rotateY(-2.5deg) translateX(-1%);
+        opacity: 0.96;
+      }
+
+      100% {
+        transform: perspective(1800px) rotateY(0deg) translateX(0);
         opacity: 1;
       }
     }
 
-    #epub-viewport.flip-left {
-      animation: flipLeft 0.14s ease-out;
+    @keyframes pageCurlPrev {
+      0% {
+        transform: perspective(1800px) rotateY(0deg) translateX(0);
+        opacity: 1;
+      }
+
+      28% {
+        transform: perspective(1800px) rotateY(7deg) translateX(3%);
+        opacity: 0.88;
+      }
+
+      58% {
+        transform: perspective(1800px) rotateY(2.5deg) translateX(1%);
+        opacity: 0.96;
+      }
+
+      100% {
+        transform: perspective(1800px) rotateY(0deg) translateX(0);
+        opacity: 1;
+      }
     }
 
-    #epub-viewport.flip-right {
-      animation: flipRight 0.14s ease-out;
+    @keyframes curlShadowNext {
+      0% {
+        box-shadow: none;
+      }
+
+      28% {
+        box-shadow: inset 14px 0 30px -8px rgba(0, 0, 0, 0.25);
+      }
+
+      100% {
+        box-shadow: none;
+      }
+    }
+
+    @keyframes curlShadowPrev {
+      0% {
+        box-shadow: none;
+      }
+
+      28% {
+        box-shadow: inset -14px 0 30px -8px rgba(0, 0, 0, 0.25);
+      }
+
+      100% {
+        box-shadow: none;
+      }
     }
 
     #epub-viewport {
@@ -1459,6 +1917,16 @@
       min-height: 500px;
       overflow: hidden;
       position: relative;
+    }
+
+    #epub-viewport.anim-next {
+      animation: pageCurlNext 0.42s cubic-bezier(0.25, 0.46, 0.45, 0.94) both,
+        curlShadowNext 0.42s cubic-bezier(0.25, 0.46, 0.45, 0.94) both;
+    }
+
+    #epub-viewport.anim-prev {
+      animation: pageCurlPrev 0.42s cubic-bezier(0.25, 0.46, 0.45, 0.94) both,
+        curlShadowPrev 0.42s cubic-bezier(0.25, 0.46, 0.45, 0.94) both;
     }
 
     /* ── DESKTOP (≥1024px) ──────────────────────────────────────── */
@@ -2345,6 +2813,28 @@
       narrativa: '📖 Narrativa Esencial',
     };
 
+    // ── TOKEN REFRESH CHECK ───────────────────────────────────────────
+    setInterval(async () => {
+      if (currentUser && driveToken) {
+        const expiry = localStorage.getItem('driveTokenExpiry');
+        if (!expiry || Date.now() > parseInt(expiry) - 6 * 60 * 60 * 1000) {
+          // Refrescar si falta menos de 6 horas
+          try {
+            const result = await signInWithPopup(auth, provider);
+            const credential = GoogleAuthProvider.credentialFromResult(result);
+            driveToken = credential?.accessToken || null;
+            if (driveToken) {
+              localStorage.setItem('driveToken', driveToken);
+              localStorage.setItem('driveTokenExpiry', Date.now() + 7 * 24 * 60 * 60 * 1000);
+              console.log('Token Drive refrescado');
+            }
+          } catch (e) {
+            console.warn('No se pudo refrescar token Drive:', e);
+          }
+        }
+      }
+    }, 6 * 60 * 60 * 1000); // cada 6 horas
+
     // ── AUTH ────────────────────────────────────────────────────
     window.signInWithGoogle = async () => {
       try {
@@ -2353,7 +2843,7 @@
         driveToken = credential?.accessToken || null;
         if (driveToken) {
           localStorage.setItem('driveToken', driveToken);
-          localStorage.setItem('driveTokenExpiry', Date.now() + 3500 * 1000);
+          localStorage.setItem('driveTokenExpiry', Date.now() + 7 * 24 * 60 * 60 * 1000);
         }
         await initUserSession(result.user);
       } catch (e) {
@@ -2412,13 +2902,28 @@
         if (cachedToken && cachedExpiry && Date.now() < parseInt(cachedExpiry)) {
           driveToken = cachedToken;
         } else {
-          driveToken = null;
-          localStorage.removeItem('driveToken');
-          localStorage.removeItem('driveTokenExpiry');
+          // Intentar refrescar token silenciosamente si el usuario ya está autenticado
+          try {
+            const result = await signInWithPopup(auth, provider);
+            const credential = GoogleAuthProvider.credentialFromResult(result);
+            driveToken = credential?.accessToken || null;
+            if (driveToken) {
+              localStorage.setItem('driveToken', driveToken);
+              localStorage.setItem('driveTokenExpiry', Date.now() + 7 * 24 * 60 * 60 * 1000);
+            }
+          } catch (e) {
+            console.warn('No se pudo refrescar token Drive:', e);
+            driveToken = null;
+            localStorage.removeItem('driveToken');
+            localStorage.removeItem('driveTokenExpiry');
+          }
         }
         await initUserSession(user);
       } else {
-        document.getElementById('loading').style.display = 'none';
+        currentUser = null; driveToken = null; driveFolderId = null;
+        userBooksCache = {};
+        localStorage.removeItem('driveToken');
+        localStorage.removeItem('driveTokenExpiry');
         showScreen('login');
       }
     });
@@ -2498,7 +3003,11 @@
     }
 
     async function uploadEpubToDrive(file, bookId, bookTitle) {
-      if (!driveToken) { showToast('Conecta Google Drive primero', 'error'); return null; }
+      if (!driveToken) {
+        showToast('Google Drive no está conectado. Conecta para subir ePubs.', 'error');
+        setTimeout(() => openDriveModal(), 800);
+        return null;
+      }
       const folderId = await ensureDriveFolder();
       showToast('Subiendo a Drive...');
 
@@ -2571,7 +3080,11 @@
         ? (fileId.startsWith('http') ? fileId : new URL(fileId, window.location.href).href)
         : `https://www.googleapis.com/drive/v3/files/${fileId}?alt=media`;
 
-      if (!isDirectPath && !driveToken) { showToast('Conecta Google Drive primero', 'error'); return null; }
+      if (!isDirectPath && !driveToken) {
+        showToast('Google Drive no está conectado. Conecta para descargar ePubs.', 'error');
+        setTimeout(() => openDriveModal(), 800);
+        return null;
+      }
       showToast('Descargando desde Drive...');
       try {
         const res = await fetch(fetchUrl, isDirectPath ? {} : { headers: { Authorization: `Bearer ${driveToken}` } });
@@ -2852,7 +3365,11 @@
 
     window.triggerEpubUpload = (id) => {
       currentBookId = id;
-      if (!driveToken) { openDriveModal(); return; }
+      if (!driveToken) {
+        showToast('Google Drive no está conectado. Conecta para subir ePubs.', 'error');
+        setTimeout(() => openDriveModal(), 800);
+        return;
+      }
       document.getElementById('file-input').click();
     };
 
@@ -2905,7 +3422,11 @@
       const file = e.dataTransfer.files[0];
       if (!file || !file.name.endsWith('.epub')) { showToast('Solo archivos .epub', 'error'); return; }
       currentBookId = id;
-      if (!driveToken) { openDriveModal(); return; }
+      if (!driveToken) {
+        showToast('Google Drive no está conectado. Conecta para subir ePubs.', 'error');
+        setTimeout(() => openDriveModal(), 800);
+        return;
+      }
       const b = BOOKS.find(x => x.id === id);
       const fileId = await uploadEpubToDrive(file, id, b.title);
       if (fileId) { renderApp(); openBookModal(id); }
@@ -2934,23 +3455,26 @@
           a.remove();
           URL.revokeObjectURL(url);
           showToast('✓ ePub descargado', 'success');
-          return;
+        } else {
+          showToast('Google Drive no está conectado. Conecta para descargar ePubs.', 'error');
+          setTimeout(() => openDriveModal(), 800);
         }
-
-        // Sin token: abrir el enlace público directamente (evita fetch/CORS)
-        const a = document.createElement('a');
-        a.href = publicUrl;
-        a.target = '_blank';
-        a.rel = 'noopener';
-        a.download = bs.drive_file_name || 'libro.epub';
-        document.body.appendChild(a);
-        a.click();
-        a.remove();
-        showToast('Abriendo descarga pública...', 'success');
+        return;
       } catch (e) {
         console.error('Download error:', e);
         showToast('Error al descargar ePub', 'error');
       }
+
+      // Sin token: abrir el enlace público directamente (evita fetch/CORS)
+      const a = document.createElement('a');
+      a.href = publicUrl;
+      a.target = '_blank';
+      a.rel = 'noopener';
+      a.download = bs.drive_file_name || 'libro.epub';
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+      showToast('Abriendo descarga pública...', 'success');
     };
 
     // ── EPUB READER ──────────────────────────────────────────────
@@ -3052,72 +3576,394 @@
         });
 
         let locationsReady = false;
+        // Referencia local para evitar race condition cuando closeReader() pone epubBook=null
+        const localBook = epubBook;
+
         const updatePctForCfi = async (locCfi) => {
-          if (!locationsReady || !locCfi) return null;
-          const pageFromLocation = epubBook.locations.percentageFromCfi(locCfi);
-          if (typeof pageFromLocation === 'number' && !Number.isNaN(pageFromLocation)) {
-            const pct = Math.round(pageFromLocation * 100);
-            document.getElementById('reader-loc').textContent = `${pct}% del libro`;
-            document.getElementById('reader-loc-mobile').textContent = `${pct}% del libro`;
-            if (currentBookId) {
-              await saveBookData(currentBookId, { current_cfi: locCfi, reading_progress: pct });
+          if (!locationsReady || !locCfi || !localBook) return null;
+          try {
+            const pageFromLocation = localBook.locations.percentageFromCfi(locCfi);
+            if (typeof pageFromLocation === 'number' && !Number.isNaN(pageFromLocation)) {
+              const pct = Math.round(pageFromLocation * 100);
+              document.getElementById('reader-loc').textContent = `${pct}% del libro`;
+              document.getElementById('reader-loc-mobile').textContent = `${pct}% del libro`;
+              if (currentBookId) {
+                await saveBookData(currentBookId, { current_cfi: locCfi, reading_progress: pct });
+              }
+              return pct;
             }
-            return pct;
-          }
+          } catch (e) { /* libro destruido, ignorar */ }
           return null;
         };
 
-        // Generate locations in the background for progress calculation
-        epubBook.ready.then(() => epubBook.locations.generate(1600)).then(async () => {
-          locationsReady = true;
-          if (cfi) { await updatePctForCfi(cfi); }
-          // Guardar portada si no existe
-          if (currentBookId && !bs.cover_data_url) {
-            try {
-              const coverUrl = await epubBook.coverUrl();
-              if (coverUrl) {
-                const resp = await fetch(coverUrl);
-                const blob = await resp.blob();
-                const dataUrl = await new Promise(res => { const fr = new FileReader(); fr.onload = () => res(fr.result); fr.readAsDataURL(blob); });
-                userBooksCache[currentBookId] = { ...(userBooksCache[currentBookId] || {}), cover_data_url: dataUrl };
-                await saveBookData(currentBookId, { cover_data_url: dataUrl });
-              }
-            } catch (e) {
-              console.warn('No se pudo extraer portada:', e);
+        localBook.ready
+          .then(() => localBook.locations.generate(1600))
+          .then(async () => {
+            locationsReady = true;
+            if (cfi) { await updatePctForCfi(cfi); }
+            if (currentBookId && !bs.cover_data_url) {
+              try {
+                const coverUrl = await localBook.coverUrl();
+                if (coverUrl) {
+                  const resp = await fetch(coverUrl);
+                  const blob = await resp.blob();
+                  const dataUrl = await new Promise(res => { const fr = new FileReader(); fr.onload = () => res(fr.result); fr.readAsDataURL(blob); });
+                  userBooksCache[currentBookId] = { ...(userBooksCache[currentBookId] || {}), cover_data_url: dataUrl };
+                  await saveBookData(currentBookId, { cover_data_url: dataUrl });
+                }
+              } catch (e) { console.warn('No se pudo extraer portada:', e); }
             }
+          }).catch(e => console.warn("Location generation err:", e));
+
+        // ── NAVEGACIÓN CURL ──────────────────────────────────────────
+        const triggerCurl = (dir) => {
+          const vp = document.getElementById('epub-viewport');
+          vp.classList.remove('anim-next', 'anim-prev');
+          void vp.offsetWidth; // reflow para reiniciar animación
+          vp.classList.add(dir === 'next' ? 'anim-next' : 'anim-prev');
+          const cleanup = () => { vp.classList.remove('anim-next', 'anim-prev'); vp.removeEventListener('animationend', cleanup); };
+          vp.addEventListener('animationend', cleanup);
+        };
+        const doPrev = () => { triggerCurl('prev'); epubRendition.prev(); };
+        const doNext = () => { triggerCurl('next'); epubRendition.next(); };
+
+        // ── TTS — LECTURA GUIADA POR LIBRIN ─────────────────────────
+        let ttsUtterance = null;
+        let ttsPlaying = false;
+        let ttsRate = 1.0;
+        let ttsVoice = null;
+        let ttsIsAutoActive = false;
+
+        // Obtener texto de la página actual desde el iframe de epub.js
+        const getTtsText = () => {
+          try {
+            const iframes = document.getElementById('epub-viewport').querySelectorAll('iframe');
+            for (const f of iframes) {
+              const doc = f.contentDocument;
+              if (!doc) continue;
+              const win = f.contentWindow;
+              const vH = win.innerHeight;
+              const vW = win.innerWidth;
+
+              const tags = 'p, h1, h2, h3, h4, h5, h6, li, blockquote, div';
+              const els = Array.from(doc.querySelectorAll(tags));
+              let visibleText = '';
+
+              for (const el of els) {
+                const txt = el.innerText?.trim();
+                if (!txt) continue;
+
+                // Evitar divs con hijos de texto ya procesados
+                if (el.tagName === 'DIV' && el.children.length > 0) {
+                  const hasTextChild = Array.from(el.children).some(c =>
+                    ['P', 'H1', 'H2', 'H3', 'H4', 'H5', 'H6', 'LI', 'BLOCKQUOTE'].includes(c.tagName)
+                  );
+                  if (hasTextChild) continue;
+                }
+
+                const r = el.getBoundingClientRect();
+                // Detección de visibilidad en viewport
+                if (r.bottom > 0 && r.top < vH && r.right > 0 && r.left < vW) {
+                  visibleText += txt + ' ';
+                }
+              }
+
+              if (visibleText.trim().length > 10) return visibleText.trim();
+            }
+          } catch (e) { console.warn('getTtsText error:', e); }
+          return (window._librinCurrentVisibleText || '').slice(0, 6000) || null;
+        };
+
+        const ttsStop = () => {
+          window.speechSynthesis.cancel();
+          ttsPlaying = false;
+          ttsUtterance = null;
+          ttsIsAutoActive = false;
+          updateTtsBtn();
+        };
+
+        const ttsSpeak = (text) => {
+          if (!text) {
+            if (ttsIsAutoActive) { doNext(); } // Si no hay texto en auto, intentamos pasar
+            else { showToast('No hay texto en esta página para leer', 'error'); }
+            return;
           }
-        }).catch(e => console.error("Location generation err:", e));
+          ttsIsAutoActive = true;
+          window.speechSynthesis.cancel();
+          ttsUtterance = new SpeechSynthesisUtterance(text);
+          ttsUtterance.rate = ttsRate;
+          ttsUtterance.pitch = 1.05;
+          ttsUtterance.volume = 1;
+          if (ttsVoice) ttsUtterance.voice = ttsVoice;
+          if (!ttsVoice) {
+            const voices = window.speechSynthesis.getVoices();
+            const esVoice = voices.find(v => v.lang.startsWith('es') && !v.name.includes('Google') ? false : v.lang.startsWith('es'));
+            if (esVoice) ttsUtterance.voice = esVoice;
+          }
+          ttsUtterance.onstart = () => { ttsPlaying = true; updateTtsBtn(); };
+          ttsUtterance.onend = () => {
+            ttsPlaying = false; ttsUtterance = null; updateTtsBtn();
+            if (ttsIsAutoActive) { doNext(); }
+          };
+          ttsUtterance.onerror = () => { ttsPlaying = false; ttsUtterance = null; updateTtsBtn(); };
+          window.speechSynthesis.speak(ttsUtterance);
+          ttsPlaying = true;
+          updateTtsBtn();
+        };
 
-        const doPrev = () => { document.getElementById('epub-viewport').classList.add('flip-left'); setTimeout(() => document.getElementById('epub-viewport').classList.remove('flip-left'), 180); epubRendition.prev(); };
-        const doNext = () => { document.getElementById('epub-viewport').classList.add('flip-right'); setTimeout(() => document.getElementById('epub-viewport').classList.remove('flip-right'), 180); epubRendition.next(); };
+        const ttsToggle = () => {
+          if (ttsPlaying) { ttsStop(); return; }
+          const text = getTtsText();
+          ttsSpeak(text);
+        };
 
-        // Tipografía (tamaño y peso)
+        const updateTtsBtn = () => {
+          const btn = document.getElementById('tp-tts-btn');
+          if (!btn) return;
+          if (ttsPlaying) {
+            btn.className = 'tts-btn-main tts-playing';
+            btn.innerHTML = `
+              <div class="tts-waves">
+                <div class="tts-wave"></div><div class="tts-wave"></div>
+                <div class="tts-wave"></div><div class="tts-wave"></div>
+                <div class="tts-wave"></div>
+              </div>
+              <span>Pausar lectura</span>`;
+          } else {
+            btn.className = 'tts-btn-main tts-idle';
+            btn.innerHTML = `<span style="font-size:1rem">▶</span> <span>Iniciar lectura en voz</span>`;
+          }
+          btn.onclick = ttsToggle;
+        };
+
+        // Poblar voces disponibles en el selector
+        const populateVoices = (sel) => {
+          if (!sel) return;
+          const fill = () => {
+            const voices = window.speechSynthesis.getVoices();
+            sel.innerHTML = '';
+            const esVoices = voices.filter(v => v.lang.startsWith('es'));
+            const group = esVoices.length ? esVoices : voices.slice(0, 20);
+            group.forEach((v, i) => {
+              const opt = document.createElement('option');
+              opt.value = i;
+              opt.textContent = v.name.replace(/Microsoft |Google /, '').slice(0, 22);
+              sel.appendChild(opt);
+            });
+            if (!ttsVoice && group.length) ttsVoice = group[0];
+            sel.onchange = () => {
+              ttsVoice = group[parseInt(sel.value)];
+              if (ttsPlaying) { ttsStop(); ttsSpeak(getTtsText()); }
+            };
+          };
+          fill();
+          window.speechSynthesis.onvoiceschanged = fill;
+        };
+
+        // ── TIPOGRAFÍA ───────────────────────────────────────────────
+        const FONTS = [
+          { id: 'playfair', name: 'Playfair', stack: '"Playfair Display", Georgia, serif', sample: 'Elegante · serif' },
+          { id: 'lora', name: 'Lora', stack: '"Lora", Georgia, serif', sample: 'Clásica · serif' },
+          { id: 'garamond', name: 'Garamond', stack: '"EB Garamond", "Garamond", Georgia, serif', sample: 'Histórica · serif' },
+          { id: 'crimson', name: 'Crimson', stack: '"Crimson Pro", Georgia, serif', sample: 'Legible · serif' },
+          { id: 'merri', name: 'Merri.', stack: '"Merriweather", Georgia, serif', sample: 'Periódico · serif' },
+          { id: 'dmsans', name: 'DM Sans', stack: '"DM Sans", sans-serif', sample: 'Moderna · sans' },
+        ];
+        const WEIGHTS = [
+          { id: '300', label: 'Light', val: '300' },
+          { id: '400', label: 'Normal', val: '400' },
+          { id: '500', label: 'Medium', val: '500' },
+          { id: '600', label: 'Semibold', val: '600' },
+          { id: '700', label: 'Bold', val: '700' },
+        ];
+
         let fontScale = 1.0;
-        let isBold = false;
+        let currentWeight = '400';
+        let currentFont = FONTS[0];
+
         const applyTypography = () => {
           if (!epubRendition || !epubRendition.themes) return;
           const sizePct = Math.round(fontScale * 100);
           const theme = {
-            'body': {
-              'font-size': `${sizePct}%`,
-              'font-weight': isBold ? '600' : '400',
-              'line-height': '1.55',
-              'letter-spacing': '0.01em'
+            'body, p, div, span, li, td': {
+              'font-family': `${currentFont.stack} !important`,
+              'font-size': `${sizePct}% !important`,
+              'font-weight': `${currentWeight} !important`,
+              'line-height': '1.65 !important',
+              'letter-spacing': '0.01em !important',
             },
-            'p': {
-              'font-size': `${sizePct}%`,
-              'font-weight': isBold ? '600' : '400',
-              'line-height': '1.55',
-              'letter-spacing': '0.01em'
+            'h1,h2,h3,h4,h5,h6': {
+              'font-family': `${currentFont.stack} !important`,
+              'font-weight': String(Math.min(900, Number(currentWeight) + 200)) + ' !important',
             }
           };
           epubRendition.themes.register('readerTheme', theme);
           epubRendition.themes.select('readerTheme');
-          document.getElementById('r-bold').textContent = isBold ? 'Negrita' : 'Normal';
         };
-        const fontInc = () => { fontScale = Math.min(1.6, fontScale + 0.05); applyTypography(); };
-        const fontDec = () => { fontScale = Math.max(0.85, fontScale - 0.05); applyTypography(); };
-        const toggleBold = () => { isBold = !isBold; applyTypography(); };
+
+        const fontInc = () => { fontScale = Math.min(1.8, fontScale + 0.05); applyTypography(); updateTypePop(); };
+        const fontDec = () => { fontScale = Math.max(0.7, fontScale - 0.05); applyTypography(); updateTypePop(); };
+        const toggleBold = () => {
+          const cur = WEIGHTS.findIndex(w => w.id === currentWeight);
+          currentWeight = WEIGHTS[(cur + 1) % WEIGHTS.length].id;
+          applyTypography();
+        };
+
+        // ── PANEL COMPLETO ───────────────────────────────────────────
+        let typePop = null;
+
+        function buildTypePop() {
+          const pop = document.createElement('div');
+          pop.id = 'type-pop';
+          pop.className = 'type-pop';
+          pop.innerHTML = `
+            <div class="type-pop-header">
+              <span class="type-pop-title">Apariencia & Lectura</span>
+              <button class="type-pop-close" id="tp-close">✕</button>
+            </div>
+
+            <!-- LECTURA GUIADA POR LIBRIN -->
+            <div class="tts-section">
+              <div class="tts-label-row">
+                <div class="tts-icon">✶</div>
+                <div class="tts-label-text">
+                  <span class="tts-label-title">Lectura guiada por Librin</span>
+                  <span class="tts-label-sub">Texto a voz · avanza página automáticamente</span>
+                </div>
+              </div>
+              <button class="tts-btn-main tts-idle" id="tp-tts-btn">
+                <span style="font-size:1rem">▶</span>
+                <span>Iniciar lectura en voz</span>
+              </button>
+              <div class="tts-controls">
+                <span class="tts-speed-label">Velocidad:</span>
+                <button class="tts-speed-btn ${ttsRate === 0.75 ? 'active' : ''}" data-rate="0.75">0.75×</button>
+                <button class="tts-speed-btn ${ttsRate === 1.0 ? 'active' : ''}"  data-rate="1">1×</button>
+                <button class="tts-speed-btn ${ttsRate === 1.25 ? 'active' : ''}" data-rate="1.25">1.25×</button>
+                <button class="tts-speed-btn ${ttsRate === 1.5 ? 'active' : ''}"  data-rate="1.5">1.5×</button>
+                <select class="tts-voice-sel" id="tp-voice-sel"></select>
+              </div>
+            </div>
+
+            <!-- TAMAÑO -->
+            <div class="type-pop-section">
+              <span class="type-pop-label">Tamaño</span>
+              <div class="font-size-row">
+                <button class="font-size-btn font-size-a-small" id="tp-dec">A</button>
+                <input type="range" class="font-size-slider" id="tp-slider"
+                  min="70" max="180" step="5" value="${Math.round(fontScale * 100)}">
+                <button class="font-size-btn font-size-a-big" id="tp-inc">A</button>
+                <span class="font-size-label" id="tp-pct">${Math.round(fontScale * 100)}%</span>
+              </div>
+            </div>
+
+            <!-- PESO -->
+            <div class="type-pop-section">
+              <span class="type-pop-label">Peso</span>
+              <div class="weight-grid">
+                ${WEIGHTS.map(w => `
+                  <button class="weight-btn ${w.id === currentWeight ? 'active' : ''}" data-weight="${w.id}">
+                    <span style="font-weight:${w.val};font-family:${currentFont.stack}">Aa</span>
+                    ${w.label}
+                  </button>`).join('')}
+              </div>
+            </div>
+
+            <!-- FUENTE -->
+            <div class="type-pop-section">
+              <span class="type-pop-label">Fuente</span>
+              <div class="font-grid">
+                ${FONTS.map(f => `
+                  <button class="font-btn ${f.id === currentFont.id ? 'active' : ''}" data-font="${f.id}">
+                    <span class="font-btn-name" style="font-family:${f.stack};font-weight:${currentWeight}">${f.name}</span>
+                    <span class="font-btn-sample">${f.sample}</span>
+                  </button>`).join('')}
+              </div>
+            </div>`;
+          return pop;
+        }
+
+        function updateTypePop() {
+          if (!typePop) return;
+          const slider = typePop.querySelector('#tp-slider');
+          const pct = typePop.querySelector('#tp-pct');
+          if (slider) slider.value = Math.round(fontScale * 100);
+          if (pct) pct.textContent = Math.round(fontScale * 100) + '%';
+        }
+
+        function openTypePop() {
+          closeTypePop();
+          typePop = buildTypePop();
+          document.body.appendChild(typePop);
+
+          // Cerrar
+          typePop.querySelector('#tp-close').onclick = closeTypePop;
+
+          // TTS
+          updateTtsBtn();
+          populateVoices(typePop.querySelector('#tp-voice-sel'));
+
+          // Velocidades
+          typePop.querySelectorAll('.tts-speed-btn').forEach(btn => {
+            btn.onclick = () => {
+              ttsRate = parseFloat(btn.dataset.rate);
+              typePop.querySelectorAll('.tts-speed-btn').forEach(b => b.classList.remove('active'));
+              btn.classList.add('active');
+              if (ttsPlaying && ttsUtterance) {
+                const txt = getTtsText(); ttsStop(); ttsSpeak(txt);
+              }
+            };
+          });
+
+          // Slider tamaño
+          const slider = typePop.querySelector('#tp-slider');
+          slider.oninput = () => {
+            fontScale = parseInt(slider.value) / 100;
+            typePop.querySelector('#tp-pct').textContent = slider.value + '%';
+            applyTypography();
+          };
+          typePop.querySelector('#tp-dec').onclick = fontDec;
+          typePop.querySelector('#tp-inc').onclick = fontInc;
+
+          // Pesos
+          typePop.querySelectorAll('.weight-btn').forEach(btn => {
+            btn.onclick = () => {
+              currentWeight = btn.dataset.weight;
+              typePop.querySelectorAll('.weight-btn').forEach(b => b.classList.remove('active'));
+              btn.classList.add('active');
+              applyTypography();
+            };
+          });
+
+          // Fuentes
+          typePop.querySelectorAll('.font-btn').forEach(btn => {
+            btn.onclick = () => {
+              const f = FONTS.find(x => x.id === btn.dataset.font);
+              if (!f) return;
+              currentFont = f;
+              typePop.querySelectorAll('.font-btn').forEach(b => b.classList.remove('active'));
+              btn.classList.add('active');
+              applyTypography();
+            };
+          });
+
+          // Click fuera cierra
+          setTimeout(() => {
+            const outside = (e) => {
+              if (!typePop || typePop.contains(e.target)) return;
+              if (e.target.id === 'r-type-mobile' || e.target.id === 'r-type-mobile2') return;
+              closeTypePop();
+              document.removeEventListener('click', outside);
+            };
+            document.addEventListener('click', outside);
+          }, 0);
+        }
+
+        function closeTypePop() {
+          document.getElementById('type-pop')?.remove();
+          typePop = null;
+          // No detener TTS al cerrar el panel — sigue leyendo en background
+        }
 
         document.getElementById('r-font-inc').onclick = fontInc;
         document.getElementById('r-font-dec').onclick = fontDec;
@@ -3206,6 +4052,31 @@
           }
         });
 
+        // Capturar texto de la página actual para TTS
+        epubRendition.on('rendered', (section, view) => {
+          try {
+            const iframes = document.getElementById('epub-viewport').querySelectorAll('iframe');
+            for (const f of iframes) {
+              const txt = f.contentDocument?.body?.innerText?.trim();
+              if (txt && txt.length > 20) {
+                window._librinCurrentVisibleText = txt;
+                break;
+              }
+            }
+          } catch (e) { }
+
+          // Si el modo auto está activo, reanudamos la lectura en la nueva página
+          if (ttsIsAutoActive) {
+            setTimeout(() => {
+              if (ttsIsAutoActive) {
+                const txt = getTtsText();
+                if (txt) ttsSpeak(txt);
+                else { doNext(); } // Seguir buscando página con texto
+              }
+            }, 600);
+          }
+        });
+
         // Gestos de deslizamiento (touch/mouse) para cambiar página
         const viewportEl = document.getElementById('epub-viewport');
         let swipeLayer = document.getElementById('swipe-layer');
@@ -3262,26 +4133,16 @@
         document.getElementById('r-prev-mobile').onclick = doPrev;
         document.getElementById('r-next-mobile').onclick = doNext;
         document.getElementById('r-toc-mobile').onclick = () => document.getElementById('r-toc').onclick();
-        document.getElementById('r-type-mobile2').onclick = (ev) => document.getElementById('r-type-mobile').onclick(ev);
+        document.getElementById('r-type-mobile2').onclick = (ev) => {
+          ev.stopPropagation();
+          document.getElementById('r-type-mobile').onclick(ev);
+        };
 
-        // Popover tipografía en móvil
+        // Botón Aa — abre el panel de tipografía + lectura guiada
         document.getElementById('r-type-mobile').onclick = (ev) => {
-          const existing = document.getElementById('type-pop');
-          if (existing) { existing.remove(); return; }
-          const pop = document.createElement('div');
-          pop.id = 'type-pop';
-          pop.className = 'type-pop';
-          pop.innerHTML = `
-            <button id="m-font-dec">A-</button>
-            <button id="m-font-inc">A+</button>
-            <button id="m-bold">${isBold ? 'Negrita' : 'Normal'}</button>
-          `;
-          document.body.appendChild(pop);
-          document.getElementById('m-font-inc').onclick = (e) => { e.stopPropagation(); fontInc(); };
-          document.getElementById('m-font-dec').onclick = (e) => { e.stopPropagation(); fontDec(); };
-          document.getElementById('m-bold').onclick = (e) => { e.stopPropagation(); toggleBold(); document.getElementById('m-bold').textContent = isBold ? 'Negrita' : 'Normal'; };
-          const closePop = (e) => { if (!pop.contains(e.target) && e.target.id !== 'r-type-mobile' && e.target.id !== 'r-type-mobile2') { pop.remove(); document.removeEventListener('click', closePop); } };
-          setTimeout(() => document.addEventListener('click', closePop), 0);
+          ev.stopPropagation();
+          if (document.getElementById('type-pop')) { closeTypePop(); return; }
+          openTypePop();
         };
       } catch (e) {
         document.getElementById('epub-viewport').innerHTML =
@@ -3291,6 +4152,7 @@
 
     window.closeReader = () => {
       if (window.hideLibrinFab) hideLibrinFab();
+      window.speechSynthesis && window.speechSynthesis.cancel();
       if (epubRendition) { try { epubRendition.destroy(); } catch (e) { } epubRendition = null; epubBook = null; }
       const targetId = returnToModalId || lastModalBookId;
       showScreen('app');
