@@ -2896,47 +2896,44 @@
 
     onAuthStateChanged(auth, async user => {
       if (user) {
-        currentUser = user;
-        const cachedToken = localStorage.getItem('driveToken');
-        const cachedExpiry = localStorage.getItem('driveTokenExpiry');
-        if (cachedToken && cachedExpiry && Date.now() < parseInt(cachedExpiry)) {
-          driveToken = cachedToken;
-        } else {
-          // Intentar refrescar token silenciosamente si el usuario ya está autenticado
-          try {
-            const result = await signInWithPopup(auth, provider);
-            const credential = GoogleAuthProvider.credentialFromResult(result);
-            driveToken = credential?.accessToken || null;
-            if (driveToken) {
-              localStorage.setItem('driveToken', driveToken);
-              localStorage.setItem('driveTokenExpiry', Date.now() + 7 * 24 * 60 * 60 * 1000);
-            }
-          } catch (e) {
-            console.warn('No se pudo refrescar token Drive:', e);
-            driveToken = null;
-            localStorage.removeItem('driveToken');
-            localStorage.removeItem('driveTokenExpiry');
-          }
-        }
+        console.log('Usuario detectado:', user.email);
         await initUserSession(user);
       } else {
+        console.log('No hay sesión activa.');
         currentUser = null; driveToken = null; driveFolderId = null;
         userBooksCache = {};
         localStorage.removeItem('driveToken');
         localStorage.removeItem('driveTokenExpiry');
+        document.getElementById('loading').style.display = 'none';
         showScreen('login');
       }
     });
 
     async function initUserSession(user) {
-      currentUser = user;
-      // Load user books from Firestore
-      await loadUserBooks();
-      // Update UI
-      updateUserUI(user);
-      renderApp();
-      document.getElementById('loading').style.display = 'none';
-      showScreen('app');
+      try {
+        console.log('Iniciando sesión de usuario:', user.uid);
+        currentUser = user;
+        // Cargar token de Drive si existe y es válido
+        const cachedToken = localStorage.getItem('driveToken');
+        const cachedExpiry = localStorage.getItem('driveTokenExpiry');
+        if (cachedToken && cachedExpiry && Date.now() < parseInt(cachedExpiry)) {
+          driveToken = cachedToken;
+        } else {
+          driveToken = null;
+          console.log('Token de Drive expirado o no encontrado.');
+        }
+
+        await loadUserBooks();
+        updateUserUI(user);
+        renderApp();
+        console.log('Sesión inicializada correctamente.');
+      } catch (e) {
+        console.error('Error en initUserSession:', e);
+        showToast('Error al cargar datos del usuario', 'error');
+      } finally {
+        document.getElementById('loading').style.display = 'none';
+        showScreen('app');
+      }
     }
 
     function updateUserUI(user) {
