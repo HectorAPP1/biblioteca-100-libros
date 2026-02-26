@@ -4,7 +4,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-  <title>Biblioteca · 100 Libros Esenciales</title>
+  <title>Librin · Tu biblioteca personal</title>
 
   <!-- Favicon -->
   <link rel="icon" type="image/svg+xml" href="favicon.svg">
@@ -12,14 +12,14 @@
   <!-- PWA / iPhone "Agregar a pantalla de inicio" -->
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-  <meta name="apple-mobile-web-app-title" content="Biblioteca">
+  <meta name="apple-mobile-web-app-title" content="Librin">
   <link rel="apple-touch-icon" href="apple-touch-icon.svg">
 
   <!-- Theme color (barra del navegador en Android y Safari) -->
   <meta name="theme-color" content="#0f0d09">
 
   <!-- Open Graph básico -->
-  <meta name="description" content="100 Libros Esenciales — Tu biblioteca personal">
+  <meta name="description" content="Librin — Tu biblioteca personal de 100 libros esenciales">
 
   <link
     href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;0,900;1,400&family=DM+Sans:opsz,wght@9..40,300;9..40,400;9..40,500&display=swap"
@@ -1999,14 +1999,14 @@
   <!-- LOADING -->
   <div class="loading-overlay" id="loading">
     <div class="spinner"></div>
-    <p>Cargando biblioteca...</p>
+    <p>Cargando Librin...</p>
   </div>
 
   <!-- ═══════════════ LOGIN ═══════════════ -->
   <div class="screen" id="screen-login">
     <div class="login-card">
       <span class="login-ornament">📚</span>
-      <h1>Biblioteca Esencial</h1>
+      <h1>Librin</h1>
       <p>100 libros que transforman una vida</p>
       <button class="btn-google" id="btn-google-login">
         <svg viewBox="0 0 24 24">
@@ -2030,7 +2030,7 @@
   <div class="screen" id="screen-app">
 
     <div class="topbar">
-      <div class="topbar-logo">📚 Biblioteca</div>
+      <div class="topbar-logo">📚 Librin</div>
       <div class="topbar-search">
         <span class="topbar-search-icon">⌕</span>
         <input type="text" id="search-input" placeholder="Buscar título o autor...">
@@ -2160,7 +2160,7 @@
         <div class="drive-section" id="drive-connect-section">
           <h3>Conectar Drive</h3>
           <p class="drive-info">Al conectar, la app podrá guardar y leer tus archivos ePub desde una carpeta en tu
-            Google Drive llamada <strong>Biblioteca Esencial</strong>.</p>
+            Google Drive llamada <strong>Librin</strong>.</p>
           <button class="drive-btn" id="btn-connect-drive" onclick="connectDrive()">
             ☁ Autorizar Google Drive
           </button>
@@ -2205,7 +2205,7 @@
       appId: "1:128482234061:web:cf3e754de8da8eaf706384",
     };
     const GOOGLE_CLIENT_ID = "128482234061-c2vb7s3pm2pnbl534jsq8geb31k9an3s.apps.googleusercontent.com";
-    const DRIVE_FOLDER_NAME = "Biblioteca Esencial";
+    const DRIVE_FOLDER_NAME = "Librin";
     const DRIVE_SCOPE = "https://www.googleapis.com/auth/drive.file";
 
     // ── INIT ────────────────────────────────────────────────────
@@ -3309,7 +3309,7 @@
       const detail = document.getElementById('drive-status-detail');
       const section = document.getElementById('drive-connect-section');
       if (driveToken) {
-        detail.textContent = '✓ Conectado. Los ePubs se guardan en tu Google Drive, carpeta "Biblioteca Esencial".';
+        detail.textContent = '✓ Conectado. Los ePubs se guardan en tu Google Drive, carpeta "Librin".';
         section.style.display = 'none';
       } else {
         detail.textContent = 'No conectado. Autoriza el acceso para poder guardar y leer tus ePubs desde Drive.';
